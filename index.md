@@ -2,7 +2,7 @@
 
 ## Projects
 
-- add your assignments here
+- [Interactive Scene - Exploration Game](#1-explore)
 
 ## Demos
 
