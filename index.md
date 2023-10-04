@@ -2,7 +2,7 @@
 
 ## Projects
 
-- [Interactive Scene - Exploration Game](#1-explore)
+- [Interactive Scene - Exploration Game](A1-explore)
 
 ## Demos
 
