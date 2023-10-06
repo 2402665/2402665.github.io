@@ -2,25 +2,31 @@
 // Ethan
 // Oct 5
 
-let theBall = {
-  x: 50,
-  y: 50,
-  radius: 50,
-  r: 255,
-  g: 0,
-  b: 0,
-  dx: -4,
-  dy: -3,
-};
+let theBall;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  theBall = spawnBall();
 }
 
 function draw() {
   background(220);
   moveBall();
   drawBall();
+}
+
+function spawnBall(){
+  let newBall = {
+    radius: random(5,50),
+    x: random(width),
+    y: random(height),
+    r: random(255),
+    g: random(255),
+    b: random(255),
+    dx: random(-5,5),
+    dy: random(-5,5),
+  };
+  return newBall;
 }
 
 function moveBall(){
