@@ -3,6 +3,7 @@
 ## Projects
 
 - [Interactive Scene - Exploration Game](A1-explore)
+- [Arrays/Objects Assignment - Dungeon Discovery](A2-discover)
 
 ## Demos
 
