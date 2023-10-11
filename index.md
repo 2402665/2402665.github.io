@@ -8,8 +8,8 @@
 ## Demos
 
 - [Mouse Ball Initial Tutorial](00-ball)
-- [Bouncing Ball Across Width](01-bounce)
-- [Bouncing Ball Across Screen](02-bouncer)
+- [Bouncing Ball Across Width](01-bounce-width)
+- [Bouncing Ball Across Screen](02-bounce-screen)
 - [WMCI Rectangle](03-rectangle)
 - [Rectangle/Circle Drawer](04-rectcirc)
 - [Parsing Booleans Demo 1](05-parsing)
@@ -22,4 +22,5 @@
 - [millis() Demo](12-millis)
 - [Start Screen Demo](13-start)
 - [Traffic Light Practice Problem](14-traffic)
-- [Ball Object Notation Demo](15-ball-object)
+- [Ball Object Notation](15-ball-object)
+- [Ball Array](16-ball-array)
