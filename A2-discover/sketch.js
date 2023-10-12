@@ -33,9 +33,11 @@ let canva = {
   h: 0,
 };
 
-let borderColor;
-let backgroundColor;
-let playerColor;
+let colors = {
+  bg: 0,
+  border: 0,
+  player: 0,
+};
 
 let roomBorder; // the width / height of the room border. Becomes defined later.
 let exitScale = 2; // how large the exits should be
@@ -86,7 +88,7 @@ let roomObjects = {
     h: 0,
     visible: false,
   }, 
-}
+};
 
 //let battlePlayerX;
 //let battlePlayerY;
@@ -109,9 +111,13 @@ function setup() {
 
   randomExits();
 
-  borderColor = randomColors();
-  backgroundColor = randomColors();
-  playerColor = randomColors();
+  colors.bg = randomColors();
+  colors.border = randomColors();
+  colors.player = randomColors();
+
+  // for (let property in colors){
+  //   property = randomColors();
+  // }
 }
 
 function draw() {
@@ -126,7 +132,7 @@ function draw() {
 }
 
 function loadRoom() {
-  background(color(backgroundColor[0], backgroundColor[1], backgroundColor[2]));
+  background(colors.bg);
   noStroke();
   createBorder();
   createExits();
@@ -134,7 +140,7 @@ function loadRoom() {
 }
 
 function createBorder() {
-  fill(color(borderColor[0], borderColor[1], borderColor[2]));
+  fill(colors.border);
   rect(0, 0, width, roomBorder); // north border
   rect(0, 0, roomBorder, height); // west border
   rect(0, height - roomBorder, width, roomBorder); // south border
@@ -161,7 +167,7 @@ function createExits() {
 
 function drawExit(direction) {
   //north = 0, west = 1, south = 2, east = 3
-  fill(color(backgroundColor[0], backgroundColor[1], backgroundColor[2]));
+  fill(colors.bg);
   if (direction === 0) {
     rect(
       width / 2 - roomBorder * (exitScale - 0.5),
@@ -209,7 +215,7 @@ function loadEntities() {
 }
 
 function loadPlayer() {
-  fill(color(playerColor[0], playerColor[1], playerColor[2]));
+  fill(colors.player);
   rect(player.x, player.y, player.w, player.h);
 }
 
@@ -457,9 +463,9 @@ function checkRoomChange() { //changes the current room if player left
     randomExits();
     exits.num1 = oppositeExit;
     player.y = height - roomBorder - player.h / 2;
-    borderColor = randomColors();
-    backgroundColor = randomColors();
-    playerColor = randomColors();
+    colors.border = randomColors();
+    colors.bg = randomColors();
+    colors.player = randomColors();
   } 
   else if (
     exits.num1 === 1 && checkExitCollision("west") ||
@@ -471,9 +477,9 @@ function checkRoomChange() { //changes the current room if player left
     randomExits();
     exits.num1 = oppositeExit;
     player.x = width - roomBorder - player.w / 2;
-    borderColor = randomColors();
-    backgroundColor = randomColors();
-    playerColor = randomColors();
+    colors.border = randomColors();
+    colors.bg = randomColors();
+    colors.player = randomColors();
   } 
   else if (
     exits.num1 === 2 && checkExitCollision("south") ||
@@ -485,9 +491,9 @@ function checkRoomChange() { //changes the current room if player left
     randomExits();
     exits.num1 = oppositeExit;
     player.y = player.h;
-    borderColor = randomColors();
-    backgroundColor = randomColors();
-    playerColor = randomColors();
+    colors.border = randomColors();
+    colors.bg = randomColors();
+    colors.player = randomColors();
   } 
   else if (
     exits.num1 === 3 && checkExitCollision("east") ||
@@ -499,9 +505,9 @@ function checkRoomChange() { //changes the current room if player left
     randomExits();
     exits.num1 = oppositeExit;
     player.x = player.w;
-    borderColor = randomColors();
-    backgroundColor = randomColors();
-    playerColor = randomColors();
+    colors.border = randomColors();
+    colors.bg = randomColors();
+    colors.player = randomColors();
   }
 }
 
@@ -543,20 +549,20 @@ function mousePressed() {
 
 function mouseWheel(event) { //darkens or lightens all colors
   // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
-  borderColor = [
-    borderColor[0] + event.delta / 10,
-    borderColor[1] + event.delta / 10,
-    borderColor[2] + event.delta / 10,
+  colors.border = [
+    colors.border[0] + event.delta / 10,
+    colors.border[1] + event.delta / 10,
+    colors.border[2] + event.delta / 10,
   ];
-  backgroundColor = [
-    backgroundColor[0] + event.delta / 10,
-    backgroundColor[1] + event.delta / 10,
-    backgroundColor[2] + event.delta / 10,
+  colors.bg = [
+    colors.bg[0] + event.delta / 10,
+    colors.bg[1] + event.delta / 10,
+    colors.bg[2] + event.delta / 10,
   ];
-  playerColor = [
-    playerColor[0] + event.delta / 10,
-    playerColor[1] + event.delta / 10,
-    playerColor[2] + event.delta / 10,
+  colors.player = [
+    colors.player[0] + event.delta / 10,
+    colors.player[1] + event.delta / 10,
+    colors.player[2] + event.delta / 10,
   ];
 }
 
