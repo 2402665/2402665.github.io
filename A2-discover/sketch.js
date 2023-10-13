@@ -2,36 +2,29 @@
 // Computer Science 30
 // Arrays/Objects Assignment
 // Finished on October ??? 2023
-// Project Name: Dungeon Discovery
+// Project Name: Exploration Game - Discovery Update
 
 // Project Desription:
-// A fresh take on the previous room explorer, adding new objects and reformatting the code to have arrays and objects.
+// A fresh take on the previous room explorer, adding (new objects), reformatting the code to have arrays and objects, and bug fixes.
 
 // Controls:
 // Use the WSAD or arrow keys to control the tiny block in the middle.
-// Click within and not close to the room borders, however not within an exit, to teleport the block and advance through rooms quickly.
-// Scroll the mouse wheel forward to make everything darker.
-// Scroll the mouse wheel backward to make everything lighter.
+// Click within the room (but not close to the room borders and not within an exit) to teleport the block and advance through rooms quickly.
+// Scroll the mouse wheel forward to make all colors darker.
+// Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
 // 
 
 // Known Bugs:
-// When there is an exit in the north or south direction and you move upward/downward into a wall adjacent to said exit, it may lock your controls. To fix this, move in the opposite direction.
+// When there is an exit in any direction and you move into the walls adjacent to said exit, it may lock your controls. To get out of this situation, move in the opposite direction.
 // In some cases for an unknown reason, the player square cannot enter the north exit. The collision acts as if there is no exit there. When this happens, the bug listed above does not occur.
-// When the room becomes resized, the player position becomes thrown all over. For now, when the room gets resized, the player's position is reset to the direct middle of the room.
-// When the room becomes resized, there's a scroller that allows you to see past the room's border. This does not affect the game itself.
 
 // Notes:
-// Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system needed to be checked for.
+// Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system would need pieces implemented to work.
 // north = 0, west = 1, south = 2, east = 3
 
 // Code:
-
-let canva = {
-  w: 0,
-  h: 0,
-};
 
 let colors = {
   bg: 0,
@@ -58,6 +51,8 @@ let player = {
   battleX: 0,
   battleY: 0,
 };
+
+let enemies = [];
 
 let roomObjects = {
   treasureChest: {
@@ -90,15 +85,26 @@ let roomObjects = {
   }, 
 };
 
-//let battlePlayerX;
-//let battlePlayerY;
-//let battleEnemyX;
-//let battleEnemyY;
+//REMEMBER TO CHANGE PLAYER RECTMODE TO CENTER, POSSIBLY OTHERS TOO
+//ALSO CHANGE EXIT OBJECT INTO A TABLE
 
 let state = "overworld";
 
+// function preload(){
+
+// }
+
 function setup() {
-  canvas = createCanvas(windowWidth, windowHeight);
+  if (windowWidth>windowHeight){
+    canvas = createCanvas(windowHeight, windowHeight);
+  } 
+  else if (windowWidth<windowHeight){
+    canvas = createCanvas(windowWidth, windowWidth);
+  } 
+  else {
+    canvas = createCanvas(windowWidth, windowHeight);
+  }
+
   roomBorder = (width + height) / 40;
 
   player.w = roomBorder;
@@ -106,7 +112,7 @@ function setup() {
   player.x = width / 2 - player.w / 2;
   player.y = height / 2 - player.h / 2;
   player.spd = roomBorder / 10;
-
+  
 
 
   randomExits();
@@ -549,45 +555,68 @@ function mousePressed() {
 
 function mouseWheel(event) { //darkens or lightens all colors
   // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
-  colors.border = [
-    colors.border[0] + event.delta / 10,
-    colors.border[1] + event.delta / 10,
-    colors.border[2] + event.delta / 10,
-  ];
-  colors.bg = [
-    colors.bg[0] + event.delta / 10,
-    colors.bg[1] + event.delta / 10,
-    colors.bg[2] + event.delta / 10,
-  ];
-  colors.player = [
-    colors.player[0] + event.delta / 10,
-    colors.player[1] + event.delta / 10,
-    colors.player[2] + event.delta / 10,
-  ];
+  for (let i=0; i<colors.bg.length; i++){
+    colors.bg[i] += event.delta / 10;
+  }
+  for (let i=0; i<colors.border.length; i++){
+    colors.border[i] += event.delta / 10;
+  }
+  for (let i=0; i<colors.player.length; i++){
+    colors.player[i] += event.delta / 10;
+  }
 }
 
 window.onresize = function() { // if the window gets resized
-  let newWidth = window.innerWidth;
-  let newHeight = window.innerHeight;  
-  canvas.size = (newWidth,newHeight);
-  width = newWidth;
-  height = newHeight;
+  let oldWidth = width;
+  let oldHeight = height;
+
+  if (windowWidth>windowHeight){
+    canvas = createCanvas(windowHeight, windowHeight);
+  } 
+  else if (windowWidth<windowHeight){
+    canvas = createCanvas(windowWidth, windowWidth);
+  } 
+  else {
+    canvas = createCanvas(windowWidth, windowHeight);
+  }
   
   roomBorder = (width + height) / 40;
   
   player.w = roomBorder;
   player.h = roomBorder;
-  
-  player.x = width / 2 - player.w / 2;
-  player.y = height / 2 - player.h / 2;
+
+  let percentOldX = player.x/oldWidth;
+  let percentOldY = player.y/oldHeight;
+
+  player.x = percentOldX*width;
+  player.y = percentOldY*height;
   
   player.spd = roomBorder / 10;
 };
 
 function randomizeObjPos(){
-  
 }
 
 // function loadBattle(){
+
+// }
+
+// function loadEnemies(){
+
+// }
+
+// function createEnemy(){
+
+// }
+
+// function battleControls(){
+
+// }
+
+// function battleUI(){
+
+// }
+
+// function battleButton(){
 
 // }
