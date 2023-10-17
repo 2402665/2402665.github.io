@@ -45,6 +45,7 @@ let player = {
   spd: 0,
   battleX: 0,
   battleY: 0,
+  sprite: null,
 };
 
 let enemies = [];
@@ -81,13 +82,12 @@ let roomObjects = {
 };
 
 //REMEMBER TO CHANGE PLAYER RECTMODE TO CENTER, POSSIBLY OTHERS TOO
-//ALSO CHANGE EXIT OBJECT INTO A TABLE
 
 let state = "overworld";
 
-// function preload(){
-
-// }
+function preload(){
+  player.sprite = loadImage("link_temporary.png");
+}
 
 function setup() {
   if (windowWidth>windowHeight){
@@ -131,9 +131,10 @@ function draw() {
     loadRoom();
     overworldControls();
     checkRoomChange();
-  } //else if (state === "battle") {
-  //   loadBattle();
-  // }
+  } 
+  else if (state === "battle") {
+    loadBattle();
+  }
 }
 
 function loadRoom() {
@@ -216,7 +217,7 @@ function loadEntities() {
 
 function loadPlayer() {
   fill(colors.player);
-  rect(player.x, player.y, player.w, player.h);
+  image(player.sprite,player.x, player.y, player.w, player.h);
 }
 
 function overworldControls() {
@@ -276,11 +277,9 @@ function collisionCheck(direction) {
   if (direction === "up") {
     if (checkExitPosition("north")) {
       // checks if there's a north exit
-      return (
-        player.y >= roomBorder ||
+      return player.y >= roomBorder ||
         player.x >= width / 2 - roomBorder * (exitScale - 0.5) &&
-          player.x + player.w < width / 2 + roomBorder * (exitScale - 0.5)
-      );
+          player.x + player.w < width / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("west")) {
       // checks if there's a west exit
@@ -288,17 +287,16 @@ function collisionCheck(direction) {
           player.x >= roomBorder &&
           player.x < width - roomBorder ||
         player.x <= roomBorder &&
-          player.y > height / 2 - roomBorder * (exitScale - 0.5) + 2
+          player.y > height / 2 - roomBorder * (exitScale - 0.5)
       ;
     }
     if (checkExitPosition("east")) {
       // checks if there's an east exit
-      return (
-        player.y >= roomBorder &&
+      return player.y >= roomBorder &&
           player.x >= roomBorder &&
           player.x <= width - roomBorder - player.w ||
         player.x >= width - roomBorder - player.w &&
-          player.y > height / 2 - roomBorder * (exitScale - 0.5) + 2)
+          player.y > height / 2 - roomBorder * (exitScale - 0.5)
       ;
     }
     return player.y > roomBorder + 1; // if only exit is south
@@ -306,22 +304,18 @@ function collisionCheck(direction) {
   else if (direction === "down") {
     if (checkExitPosition("south")) {
       // checks if there's a south exit
-      return (
-        player.y <= height - roomBorder - player.h ||
+      return player.y <= height - roomBorder - player.h ||
         player.x > width / 2 - roomBorder * (exitScale - 0.5) &&
-          player.x + player.w < width / 2 + roomBorder * (exitScale - 0.5)
-      );
+          player.x + player.w < width / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("west")) {
       // checks if there's a west exit
-      return (
-        player.y <= height - roomBorder - player.h &&
+      return player.y <= height - roomBorder - player.h &&
           player.x >= roomBorder &&
           player.x <= width - roomBorder ||
         player.x <= roomBorder &&
           player.y <
-            height / 2 + (roomBorder * (exitScale - 0.5) - roomBorder - 2))
-      ;
+            height / 2 + (roomBorder * (exitScale - 0.5) - roomBorder);
     }
     if (checkExitPosition("east")) {
       // checks if there's an east exit
@@ -330,8 +324,7 @@ function collisionCheck(direction) {
           player.x <= width - roomBorder - player.h ||
         player.x >= width - roomBorder - player.h &&
           player.y <
-            height / 2 + (roomBorder * (exitScale - 0.5) - roomBorder - 2)
-      ;
+            height / 2 + (roomBorder * (exitScale - 0.5) - roomBorder);
     }
 
     return player.y <= height - roomBorder - player.h; // if only exit is north
@@ -341,23 +334,20 @@ function collisionCheck(direction) {
       // checks if there's a west exit
       return player.x > 1 + roomBorder ||
         player.y > height / 2 - roomBorder * (exitScale - 0.5) &&
-          player.y + player.h < height / 2 + roomBorder * (exitScale - 0.5)
-      ;
+          player.y + player.h < height / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("south")) {
       // checks if there's a south exit
       return player.y <= height - roomBorder - player.h - 1 ||
-        player.x > width / 2 - roomBorder * (exitScale - 0.5) + 2 &&
+        player.x > width / 2 - roomBorder * (exitScale - 0.5) &&
           player.x + player.w <
-            width / 2 + roomBorder * (exitScale - 0.5) + 2
-      ;
+            width / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("north")) {
       // checks if there's a north exit
       return player.y > roomBorder - 1 ||
-        player.x >= width / 2 - roomBorder * (exitScale - 0.5) + 2.5 &&
-          player.x < width / 2 + roomBorder * (exitScale - 0.5) + 2
-      ;
+        player.x >= width / 2 - roomBorder * (exitScale - 0.5) &&
+          player.x < width / 2 + roomBorder * (exitScale - 0.5);
     }
 
     return player.x > roomBorder + 1; // if only exit is east
@@ -367,24 +357,21 @@ function collisionCheck(direction) {
       // checks if there's a east exit
       return player.x < width - roomBorder - player.w - 1 ||
         player.y > height / 2 - roomBorder * (exitScale - 0.5) &&
-          player.y + player.h < height / 2 + roomBorder * (exitScale - 0.5)
-      ;
+          player.y + player.h < height / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("south")) {
       // checks if there's a south exit
       return player.y <= height - roomBorder - player.h ||
-        player.x > width / 2 - roomBorder * (exitScale - 0.5) - 2 &&
+        player.x > width / 2 - roomBorder * (exitScale - 0.5) &&
           player.x + player.w <
-            width / 2 + roomBorder * (exitScale - 0.5) - 2
-      ;
+            width / 2 + roomBorder * (exitScale - 0.5);
     }
     if (checkExitPosition("north")) {
       // checks if there's a north exit
       return player.y > roomBorder - 1 ||
-        player.x >= width / 2 - roomBorder * (exitScale - 0.5) - 2.5 &&
+        player.x >= width / 2 - roomBorder * (exitScale - 0.5) &&
           player.x <
-            width / 2 + roomBorder * (exitScale - 0.5) - player.w - 2
-      ;
+            width / 2 + roomBorder * (exitScale - 0.5) - player.w;
     }
 
     return player.x <= width - roomBorder - player.w; // if only exit is west
@@ -433,63 +420,45 @@ function checkExitPosition(exitDirection){
 }
 
 function checkRoomChange() { //changes the current room if player left
+  let exitOptions = ["north","west","south","east"];
+  for (let i=0; i<4; i++){
+    for (let exit of exits){
+      if (exit===i && checkExitCollision(exitOptions[i])){
+        changeRoom(exitOptions[i]);
+      }
+    }
+  }
+}
+
+function changeRoom(direction){
   let oppositeExit;
-  if (
-    exits[0] === 0 && checkExitCollision("north") ||
-    exits[1] === 0 && checkExitCollision("north") ||
-    exits[2] === 0 && checkExitCollision("north") ||
-    exits[3] === 0 && checkExitCollision("north")
-  ) {
+  if (direction === "north") {
     oppositeExit = 2; //south
     randomExits();
     exits[0] = oppositeExit;
     player.y = height - roomBorder - player.h / 2;
-    colors.border = randomColors();
-    colors.bg = randomColors();
-    colors.player = randomColors();
   } 
-  else if (
-    exits[0] === 1 && checkExitCollision("west") ||
-    exits[1] === 1 && checkExitCollision("west") ||
-    exits[2] === 1 && checkExitCollision("west") ||
-    exits[3] === 1 && checkExitCollision("west")
-  ) {
+  else if (direction === "west") {
     oppositeExit = 3; //east
     randomExits();
     exits[0] = oppositeExit;
     player.x = width - roomBorder - player.w / 2;
-    colors.border = randomColors();
-    colors.bg = randomColors();
-    colors.player = randomColors();
   } 
-  else if (
-    exits[0] === 2 && checkExitCollision("south") ||
-    exits[1] === 2 && checkExitCollision("south") ||
-    exits[2] === 2 && checkExitCollision("south") ||
-    exits[3] === 2 && checkExitCollision("south")
-  ) {
+  else if (direction === "south") {
     oppositeExit = 0; //north
     randomExits();
     exits[0] = oppositeExit;
     player.y = player.h;
-    colors.border = randomColors();
-    colors.bg = randomColors();
-    colors.player = randomColors();
   } 
-  else if (
-    exits[0] === 3 && checkExitCollision("east") ||
-    exits[1] === 3 && checkExitCollision("east") ||
-    exits[2] === 3 && checkExitCollision("east") ||
-    exits[3] === 3 && checkExitCollision("east")
-  ) {
+  else if (direction === "east") {
     oppositeExit = 1; //west
     randomExits();
     exits[0] = oppositeExit;
     player.x = player.w;
-    colors.border = randomColors();
-    colors.bg = randomColors();
-    colors.player = randomColors();
   }
+  colors.border = randomColors();
+  colors.bg = randomColors();
+  colors.player = randomColors();
 }
 
 function checkExitCollision(direction) { //checks if a player left a room
@@ -572,26 +541,26 @@ window.onresize = function() { // if the window gets resized
 function randomizeObjPos(){
 }
 
-// function loadBattle(){
+function loadBattle(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
 
-// }
+function loadEnemies(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
 
-// function loadEnemies(){
+function createEnemy(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
 
-// }
+function battleControls(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
 
-// function createEnemy(){
+function battleUI(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
 
-// }
-
-// function battleControls(){
-
-// }
-
-// function battleUI(){
-
-// }
-
-// function battleButton(){
-
-// }
+function battleButton(){
+  text("How are you seeing this?",0,0,width,height/5);
+}
