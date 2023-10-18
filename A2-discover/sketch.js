@@ -1,7 +1,7 @@
 // Ethan Heshka
 // Computer Science 30
 // Arrays/Objects Assignment
-// Finished on October ??? 2023
+// Finished on October 19 2023
 // Project Name: Exploration Game - Discovery Update
 
 // Project Desription:
@@ -17,8 +17,9 @@
 // 
 
 // Known Bugs:
-// When there is an exit in any direction and you move into the walls adjacent to said exit, it may lock your controls. To get out of this situation, move in the opposite direction.
-// In some cases for an unknown reason, the player square cannot enter the north exit. The collision acts as if there is no exit there. When this happens, the bug listed above does not occur.
+// When there is an exit in any direction and you move into the walls adjacent to said exit, it may move you into the border and lock your controls. To get out of this situation, move in the opposite direction.
+// In some cases due to the player speed making it reach into the border but not far enough into the exit, the player square cannot enter an exit. The collision acts as if there is no exit there. When this happens, the bug listed above does not occur.
+// To fix the above, click the mouse to teleport to a different position. The next time you try is likely to let you in.
 
 // Notes:
 // Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system would need pieces implemented to work.
@@ -26,16 +27,18 @@
 
 // Code:
 
-let colors = {
-  bg: 0,
-  border: 0,
-  player: 0,
-};
+let colors = []; // adds in variables later
+let colorIndex = 3; // total amount of color variables used in code
+// 0 = background, 1 = border, 2 = player (currently unused due to player now an image)
 
 let roomBorder; // the width / height of the room border. Becomes defined later.
 let exitScale = 2; // how large the exits should be
 
 let exits = [0,0,0,0];
+
+let gridWidth = 10;
+let gridHeight = 10;
+let room = new Array(gridWidth);
 
 let player = {
   x: 0,
@@ -49,35 +52,25 @@ let player = {
 };
 
 let enemies = [];
+//enemy spawn point index would be 2
 
 let roomObjects = {
+  // restrictions are the width and height of the object in relevance to the grid; [1,1] means 1 grid block tall and 1 grid block long
   treasureChest: {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-    visible: false,
+    index: 3,
+    restrictions: [1,1],
   },
   speedBooster: {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-    visible: false,
+    index: 4,
+    restrictions: [1,1],
   },
   something: {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-    visible: false,
+    index: 5,
+    restrictions: [1,3],
   }, 
   message: {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-    visible: false,
+    index: 6,
+    restrictions: [3,1],
   }, 
 };
 
@@ -108,21 +101,13 @@ function setup() {
   player.y = height / 2 - player.h / 2;
   player.spd = roomBorder / 10;
   
-
+  colors = allNewColors(colorIndex);
 
   randomExits();
 
-  for (let exit of exits){
-    console.log(exit);
-  }
+  createRoom(room);
 
-  colors.bg = randomColors();
-  colors.border = randomColors();
-  colors.player = randomColors();
 
-  // for (let property of colors){
-  //   property = randomColors();
-  // }
 }
 
 function draw() {
@@ -137,8 +122,22 @@ function draw() {
   }
 }
 
+function createRoom(table) {
+  for(let i=0; i<table.length; i++){
+    if(i===0 || i===table.length-1){
+      table[i] = new Array(gridHeight).fill(1);
+    }
+    else {
+      table[i] = new Array(gridHeight).fill(0);
+      table[i][0] = 1;
+      table[i][table[i].length-1] = 1;
+    }
+  }
+  console.log(table);
+}
+
 function loadRoom() {
-  background(colors.bg);
+  background(color(colors[0]));
   noStroke();
   createBorder();
   createExits();
@@ -146,7 +145,7 @@ function loadRoom() {
 }
 
 function createBorder() {
-  fill(colors.border);
+  fill(color(colors[1]));
   rect(0, 0, width, roomBorder); // north border
   rect(0, 0, roomBorder, height); // west border
   rect(0, height - roomBorder, width, roomBorder); // south border
@@ -166,7 +165,7 @@ function createExits() {
 
 function drawExit(direction) {
   //north = 0, west = 1, south = 2, east = 3
-  fill(colors.bg);
+  fill(color(colors[0]));
   if (direction === 0) {
     rect(
       width / 2 - roomBorder * (exitScale - 0.5),
@@ -216,7 +215,7 @@ function loadEntities() {
 }
 
 function loadPlayer() {
-  fill(colors.player);
+  fill(color(colors[2]));
   image(player.sprite,player.x, player.y, player.w, player.h);
 }
 
@@ -379,44 +378,44 @@ function collisionCheck(direction) {
 }
 
 function checkExitPosition(exitDirection){
-  let returnBoolean = false;
+  let foundExit = false;
   if (exitDirection === "north"){
     for (let exit of exits){
-      if (returnBoolean === false){
+      if (foundExit === false){
         if (exit === 0 && player.y < roomBorder){
-          returnBoolean = true;
+          foundExit = true;
         }
       }
     }
   }
   else if (exitDirection === "west"){
     for (let exit of exits){
-      if (returnBoolean === false){
+      if (foundExit === false){
         if (exit === 1 && player.x <= roomBorder){
-          returnBoolean = true;
+          foundExit = true;
         }
       }
     }
   }
   else if (exitDirection === "south"){
     for (let exit of exits){
-      if (returnBoolean === false){
+      if (foundExit === false){
         if (exit === 2 && player.y > height - roomBorder - player.h){
-          returnBoolean = true;
+          foundExit = true;
         }
       }
     }
   }
   else if (exitDirection === "east"){
     for (let exit of exits){
-      if (returnBoolean === false){
+      if (foundExit === false){
         if (exit === 3 && player.x > width - roomBorder - player.w){
-          returnBoolean = true;
+          foundExit = true;
         }
       }
     }
   }
-  return returnBoolean;
+  return foundExit;
 }
 
 function checkRoomChange() { //changes the current room if player left
@@ -456,9 +455,7 @@ function changeRoom(direction){
     exits[0] = oppositeExit;
     player.x = player.w;
   }
-  colors.border = randomColors();
-  colors.bg = randomColors();
-  colors.player = randomColors();
+  colors = allNewColors(colorIndex);
 }
 
 function checkExitCollision(direction) { //checks if a player left a room
@@ -476,11 +473,20 @@ function checkExitCollision(direction) { //checks if a player left a room
   }
 }
 
-function randomColors() {
+function randomColor() {
   let r = random(255);
   let g = random(255);
   let b = random(255);
   return [r, g, b];
+}
+
+function allNewColors(totalColors){
+  let newColorTable = [];
+  for (let i = 0; i < totalColors; i++){
+    let newColor = randomColor();
+    newColorTable.push(newColor);
+  }
+  return newColorTable;
 }
 
 function mousePressed() { 
@@ -499,14 +505,10 @@ function mousePressed() {
 
 function mouseWheel(event) { //darkens or lightens all colors
   // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
-  for (let i=0; i<colors.bg.length; i++){
-    colors.bg[i] += event.delta / 10;
-  }
-  for (let i=0; i<colors.border.length; i++){
-    colors.border[i] += event.delta / 10;
-  }
-  for (let i=0; i<colors.player.length; i++){
-    colors.player[i] += event.delta / 10;
+  for (let aColor of colors){
+    for (let i=0; i<aColor.length; i++){
+      aColor[i] += event.delta / 10;
+    }
   }
 }
 
@@ -539,6 +541,7 @@ window.onresize = function() { // if the window gets resized
 };
 
 function randomizeObjPos(){
+
 }
 
 function loadBattle(){
