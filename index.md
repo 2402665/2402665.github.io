@@ -2,9 +2,9 @@
 
 ## Projects
 
-- [Interactive Scene - Exploration Game](A1-explore)
+- [Interactive Scene Assignment - Exploration Game](A1-explore)
 - [Arrays/Objects Assignment - Dungeon Discovery](A2-discover)
-- [GRID IMPLEMENTATION OF ASSIGNMENT 2 (UNFINISHED)](A2-discover-TEMPORARY)
+- [GRID IMPLEMENTATION FOR ASSIGNMENT 2 (UNFINISHED)](A3-grids)
 
 ## Demos
 
