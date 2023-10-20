@@ -5,21 +5,17 @@
 // Project Name: Exploration Game - Discovery Update
 
 // Project Desription:
-// A fresh take on the previous room explorer, adding (new objects), reformatting the code to have arrays and objects, and bug fixes.
+// A fresh take on the previous room explorer, redoing the game to be based on a 2D array, reformatting the code to have arrays and objects, and bug fixes.
 
 // Controls:
 // Use the WSAD or arrow keys to control the tiny block in the middle.
-// Click within the room (but not close to the room borders and not within an exit) to teleport the block and advance through rooms quickly.
 // Scroll the mouse wheel forward to make all colors darker.
 // Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
-// Added 2D arrays to create grid system for rooms
-
-// Known Bugs:
-// When there is an exit in any direction and you move into the walls adjacent to said exit, it may move you into the border and lock your controls. To get out of this situation, move in the opposite direction.
-// In some cases due to the player speed making it reach into the border but not far enough into the exit, the player square cannot enter an exit. The collision acts as if there is no exit there. When this happens, the bug listed above does not occur.
-// To fix the above, click the mouse to teleport to a different position. The next time you try is likely to let you in.
+// Used 2D arrays to create grid system for rooms to be based upon
+// Used try/catch to try to do things just in case things are undefined or error out
+// Used break to break for loops in their tracks
 
 // Notes:
 // Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system would need pieces implemented to work.
@@ -32,49 +28,48 @@ let colorIndex = 3; // total amount of color variables used in code
 // 0 = background, 1 = border, 2 = player (currently unused due to player now an image)
 
 let exits = [0,0,0,0];
-let exitScale = 2; // tells how much grid slots an exit takes
+let exitScale = 3; // tells how much grid slots an exit takes up
 
 let gridWidth = 10;
 let gridHeight = 10;
-let currentRoom = new Array(gridWidth);
+let currentRoom;
 
 let entityScale; // how big entities should be based on window and grid
 
-let player = {
-  x: 0,
+let player = { // some parts currently rendered useless as part of the grid integration for now
+  x: 0, // x and y will be implemented back into the game at a later date
   y: 0,
   w: 0,
   h: 0,
-  spd: 0,
+  spd: 0, // speed will be implemented back into the game at a later date
   battleX: 0,
   battleY: 0,
   sprite: null,
 };
 
 let enemies = [];
-//enemy spawn point index would be 2
+//enemy spawn point index would be 3
 
 let roomObjects = {
+  // didn't get into implementing this in time, will be implemented in future update
   // restrictions are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
   treasureChest: {
-    index: 3,
-    restrictions: [1,1],
-  },
-  speedBooster: {
     index: 4,
     restrictions: [1,1],
   },
-  something: {
+  speedBooster: {
     index: 5,
+    restrictions: [1,1],
+  },
+  something: {
+    index: 6,
     restrictions: [1,3],
   }, 
   message: {
-    index: 6,
+    index: 7,
     restrictions: [3,1],
   }, 
 };
-
-//REMEMBER TO CHANGE PLAYER RECTMODE TO CENTER, POSSIBLY OTHERS TOO
 
 let state = "overworld";
 
@@ -93,20 +88,19 @@ function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
   }
 
-  createRoom(currentRoom);
+  currentRoom = createRoom();
 
   entityScale = (width+height) / (gridWidth+gridHeight);
 
   player.w = entityScale;
   player.h = entityScale;
-  player.x = width / 2;
-  player.y = height / 2;
+  // player.x = width / 2;
+  // player.y = height / 2;
   player.spd = entityScale / 10;
   
   colors = allNewColors(colorIndex);
 
   randomExits();
-
 
   findExits(currentRoom);
 
@@ -117,14 +111,14 @@ function draw() {
     // If the player is not in combat
     loadRoom();
     overworldControls();
-    checkRoomChange();
   } 
   else if (state === "battle") {
     loadBattle();
   }
 }
 
-function createRoom(table) {
+function createRoom() {
+  let table = new Array(gridWidth);
   for(let i=0; i<gridWidth; i++){
     if(i===0 || i===gridWidth-1){
      table[i] = new Array(gridHeight).fill(1);
@@ -135,21 +129,23 @@ function createRoom(table) {
       table[i][gridHeight-1] = 1;
     }
   }
+  table[gridWidth/2][gridHeight/2] = 2; //player spawn point
   console.log(table);
+  return table;
 }
 
 function loadRoom() {
   background(color(colors[0]));
   noStroke();
-  createBorder(currentRoom);
-  loadEntities(currentRoom);
+  displayBorders();
+  loadEntities();
 }
 
-function createBorder(table) {
+function displayBorders() {
   fill(color(colors[1]));
   for (let i=0; i<gridWidth; i++){
     for (let j=0; j<gridHeight; j++){
-      if (table[i][j]===1){
+      if (currentRoom[i][j]===1){
         rect(width/gridWidth*j, height/gridHeight*i, width/gridWidth, height/gridHeight);
       }
     }
@@ -169,8 +165,9 @@ function addExits(direction,table){
     for (let i=0; i<gridWidth; i++){
       if (i===randomExitPosW){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
-        table[i][0] = 0;
-        table[i+1][0] = 0;
+        for (let k=0; k<exitScale; k++){
+          table[i+k][0] = 0;
+        }
       }
     }
   }
@@ -178,8 +175,9 @@ function addExits(direction,table){
     for (let j=0; j<gridHeight; j++){
       if (j===randomExitPosH){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
-        table[0][j] = 0;
-        table[0][j+1] = 0;
+        for (let k=0; k<exitScale; k++){
+          table[0][j+k] = 0;
+        }
       }
     }
   }
@@ -187,8 +185,9 @@ function addExits(direction,table){
     for (let i=0; i<gridWidth; i++){
       if (i===randomExitPosW){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
-        table[i][gridHeight-1] = 0;
-        table[i+1][gridHeight-1] = 0;
+        for (let k=0; k<exitScale; k++){
+          table[i+k][gridHeight-1] = 0;
+        }
       }
     }
   }
@@ -196,8 +195,9 @@ function addExits(direction,table){
     for (let j=0; j<gridHeight; j++){
       if (j===randomExitPosH){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
-        table[gridWidth-1][j] = 0;
-        table[gridWidth-1][j+1] = 0;
+        for (let k=0; k<exitScale; k++){
+          table[gridWidth-1][j+k] = 0;
+        }
       }
     }
   }
@@ -218,75 +218,93 @@ function loadEntities() {
 function loadPlayer() {
   push();
   fill(color(colors[2]));
-  imageMode(CENTER);
-  image(player.sprite,player.x, player.y, player.w, player.h);
+  for (let i=0; i<gridWidth; i++){
+    for (let j=0; j<gridHeight; j++){
+      if (currentRoom[i][j]===2){
+        image(player.sprite, width/gridWidth*j, height/gridHeight*i, width/gridWidth, height/gridHeight);
+      }
+    }
+  }
   pop();
 }
 
 function overworldControls() {
+  let direction;
   if (state === "overworld") {
-    if (keyIsDown(87)) {
-      // w
-      if (collisionCheck("up")) {
-        player.y -= player.spd;
-      }
+    if (keyIsDown(87) || keyIsDown(38)) {
+      // w or up arrow
+      direction = "north";
     } 
-    else if (keyIsDown(38)) {
-      // up arrow
-      if (collisionCheck("up")) {
-        player.y -= player.spd;
-      }
-    }
-    if (keyIsDown(83)) {
-      // s
-      if (collisionCheck("down")) {
-        player.y += player.spd;
-      }
+    if (keyIsDown(83) || keyIsDown(40)) {
+      // s or down arrow
+      direction = "south";
     } 
-    else if (keyIsDown(40)) {
-      // down arrow
-      if (collisionCheck("down")) {
-        player.y += player.spd;
-      }
-    }
-    if (keyIsDown(65)) {
-      // a
-      if (collisionCheck("left")) {
-        player.x -= player.spd;
-      }
+    if (keyIsDown(65) || keyIsDown(37)) {
+      // a or left arrow
+      direction = "west";
     } 
-    else if (keyIsDown(37)) {
-      // left arrow
-      if (collisionCheck("left")) {
-        player.x -= player.spd;
-      }
-    }
-    if (keyIsDown(68)) {
-      // d
-      if (collisionCheck("right")) {
-        player.x += player.spd;
-      }
+    if (keyIsDown(68) || keyIsDown(39)) {
+      // d or right arrow
+      direction = "east";
     } 
-    else if (keyIsDown(39)) {
-      // right arrow
-      if (collisionCheck("right")) {
-        player.x += player.spd;
+  }
+  movePlayer(direction)
+}
+
+function movePlayer(direction) {
+  if (direction){
+    for (let i=0; i<gridWidth; i++){
+      for (let j=0; j<gridHeight; j++){
+        if (currentRoom[i][j]===2){
+          if (direction === "north"){
+            try{
+              if (currentRoom[i-1][j] !== 1){
+                 currentRoom[i-1][j] = 2;
+                currentRoom[i][j] = 0;
+              }
+            }
+            catch {
+              changeRoom(direction)
+            }
+          }
+          else if (direction === "west"){
+            try{
+              if (currentRoom[i][j-1] !== 1){
+                currentRoom[i][j-1] = 2;
+                currentRoom[i][j] = 0;
+              }
+            }
+            catch {
+              changeRoom(direction)
+            }
+          }
+          else if (direction === "south"){
+            try{
+              if (currentRoom[i+1][j] !== 1){
+                currentRoom[i+1][j] = 2;
+                currentRoom[i][j] = 0;
+              }
+            }
+            catch {
+              changeRoom(direction)
+            }
+          }
+          else if (direction === "east"){
+            try{
+              if (currentRoom[i][j+1] !== 1){
+                currentRoom[i][j+1] = 2;
+                currentRoom[i][j] = 0;
+              }
+            }
+            catch {
+              changeRoom(direction)
+            }
+          }
+          break;
+        }
       }
     }
   }
-}
-
-function collisionCheck(direction) {
-  return true;
-}
-
-function checkRoomChange() { //changes the current room if player left
-  // let exitOptions = ["north","west","south","east"]
-  // for (let exit in exitOptions){
-  //   if (checkExitCollision(exit)){
-  //     changeRoom(exit);
-  //   }
-  // }
 }
 
 function changeRoom(direction){
@@ -297,70 +315,83 @@ function changeRoom(direction){
     oppositeExit = 2; //south
     randomExits();
     exits[0] = oppositeExit;
-    player.y = height - roomBorder - player.h / 2;
     for (let i=0; i<gridWidth; i++){
       oldExitPos.push(oldRoom[i][0])
     }
-    createRoom(currentRoom);
+    currentRoom = createRoom();
+    findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
       currentRoom[i][gridHeight-1] = oldExitPos[i]
+    }
+    for (let i=0; i<gridWidth; i++){
+      for (let j=0; j<gridHeight; j++){
+        if (oldRoom[i][j]===2){
+          currentRoom[i][gridHeight-1] = 2;
+        }
+      }
     }
   } 
   else if (direction === "west") {
     oppositeExit = 3; //east
     randomExits();
     exits[0] = oppositeExit;
-    player.x = width - roomBorder - player.w / 2;
     for (let i=0; i<gridWidth; i++){
       oldExitPos.push(oldRoom[0][i])
     }
-    createRoom(currentRoom);
+    currentRoom = createRoom();
+    findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
       currentRoom[gridWidth-1][i] = oldExitPos[i]
+    }
+    for (let i=0; i<gridWidth; i++){
+      for (let j=0; j<gridHeight; j++){
+        if (oldRoom[i][j]===2){
+          currentRoom[gridWidth-1][j] = 2;
+        }
+      }
     }
   } 
   else if (direction === "south") {
     oppositeExit = 0; //north
     randomExits();
     exits[0] = oppositeExit;
-    player.y = player.h;
     for (let i=0; i<gridWidth; i++){
       oldExitPos.push(oldRoom[i][gridHeight-1])
     }
-    createRoom(currentRoom);
+    currentRoom = createRoom();
+    findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
       currentRoom[i][0] = oldExitPos[i]
+    }
+    for (let i=0; i<gridWidth; i++){
+      for (let j=0; j<gridHeight; j++){
+        if (oldRoom[i][j]===2){
+          currentRoom[i][0] = 2;
+        }
+      }
     }
   } 
   else if (direction === "east") {
     oppositeExit = 1; //west
     randomExits();
     exits[0] = oppositeExit;
-    player.x = player.w;
     for (let i=0; i<gridWidth; i++){
       oldExitPos.push(oldRoom[gridWidth-1][i])
     }
-    createRoom(currentRoom);
+    currentRoom = createRoom();
+    findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
       currentRoom[0][i] = oldExitPos[i]
     }
+    for (let i=0; i<gridWidth; i++){
+      for (let j=0; j<gridHeight; j++){
+        if (oldRoom[i][j]===2){
+          currentRoom[0][j] = 2;
+        }
+      }
+    }
   }
   colors = allNewColors(colorIndex);
-}
-
-function checkExitCollision(direction) { //checks if a player left a currentRoom
-  if (direction === "north") {
-    return player.y <= -1 * player.h;
-  } 
-  else if (direction === "west") {
-    return player.x <= -1 * player.w;
-  } 
-  else if (direction === "south") {
-    return player.y >= height + player.h;
-  } 
-  else if (direction === "east") {
-    return player.x >= width + player.w;
-  }
 }
 
 function randomColor() {
@@ -387,8 +418,8 @@ function mousePressed() {
   //   mouseY > roomBorder &&
   //   mouseY < height - roomBorder
   // ) {
-  //   player.x = mouseX;
-  //   player.y = mouseY;
+    // player.x = mouseX;
+    // player.y = mouseY;
   // }
 }
 
@@ -421,11 +452,11 @@ window.onresize = function() { // if the window gets resized
   player.h = entityScale;
   player.spd = entityScale / 10;
 
-  let percentOldX = player.x/oldWidth;
-  let percentOldY = player.y/oldHeight;
+  // let percentOldX = player.x/oldWidth;
+  // let percentOldY = player.y/oldHeight;
 
-  player.x = percentOldX*width;
-  player.y = percentOldY*height;
+  // player.x = percentOldX*width;
+  // player.y = percentOldY*height;
   
   player.spd = entityScale / 10;
 

@@ -2,10 +2,10 @@
 // Computer Science 30
 // Arrays/Objects Assignment
 // Finished on October 19 2023
-// Project Name: Exploration Game - Discovery Update
+// Project Name: Exploration Game - Object Update
 
 // Project Desription:
-// A fresh take on the previous room explorer, adding (new objects), reformatting the code to have arrays and objects, and bug fixes.
+// A fresh take on the previous room explorer, reformatting the code to have arrays and objects, and bug fixes.
 
 // Controls:
 // Use the WSAD or arrow keys to control the tiny block in the middle.
@@ -73,8 +73,6 @@ let roomObjects = {
     restrictions: [3,1],
   }, 
 };
-
-//REMEMBER TO CHANGE PLAYER RECTMODE TO CENTER, POSSIBLY OTHERS TOO
 
 let state = "overworld";
 

@@ -4,7 +4,7 @@
 
 - [Interactive Scene - Exploration Game](A1-explore)
 - [Arrays/Objects Assignment - Dungeon Discovery](A2-discover)
-- [GRID IMPLEMENTATION OF ASSIGNMENT 2](A2-discover-TEMPORARY)
+- [GRID IMPLEMENTATION OF ASSIGNMENT 2 (UNFINISHED)](A2-discover-TEMPORARY)
 
 ## Demos
 
