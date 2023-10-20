@@ -1,6 +1,6 @@
 // Ethan Heshka
 // Computer Science 30
-// Arrays/Objects Assignment
+// 2D Arrays Assignment
 // Finished on October 19 2023
 // Project Name: Exploration Game - Discovery Update
 
