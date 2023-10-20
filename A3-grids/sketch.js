@@ -5,17 +5,15 @@
 // Project Name: Exploration Game - Discovery Update
 
 // Project Desription:
-// A fresh take on the previous room explorer, redoing the game to be based on a 2D array, reformatting the code to have arrays and objects, and bug fixes.
-
+// A fresh take on the previous room explorer, redoing the game to be based on a 2D array, adding spawning objects
 // Controls:
 // Use the WSAD or arrow keys to control the tiny block in the middle.
 // Scroll the mouse wheel forward to make all colors darker.
 // Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
-// Used 2D arrays to create grid system for rooms to be based upon
 // Used try/catch to try to do things just in case things are undefined or error out
-// Used break to break for loops in their tracks
+// Used break to stop loops once a certain condition is filled
 
 // Notes:
 // Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system would need pieces implemented to work.
@@ -121,7 +119,7 @@ function createRoom() {
   let table = new Array(gridWidth);
   for(let i=0; i<gridWidth; i++){
     if(i===0 || i===gridWidth-1){
-     table[i] = new Array(gridHeight).fill(1);
+      table[i] = new Array(gridHeight).fill(1);
     }
     else {
       table[i] = new Array(gridHeight).fill(0);
@@ -248,7 +246,7 @@ function overworldControls() {
       direction = "east";
     } 
   }
-  movePlayer(direction)
+  movePlayer(direction);
 }
 
 function movePlayer(direction) {
@@ -259,12 +257,12 @@ function movePlayer(direction) {
           if (direction === "north"){
             try{
               if (currentRoom[i-1][j] !== 1){
-                 currentRoom[i-1][j] = 2;
+                currentRoom[i-1][j] = 2;
                 currentRoom[i][j] = 0;
               }
             }
             catch {
-              changeRoom(direction)
+              changeRoom(direction);
             }
           }
           else if (direction === "west"){
@@ -275,7 +273,7 @@ function movePlayer(direction) {
               }
             }
             catch {
-              changeRoom(direction)
+              changeRoom(direction);
             }
           }
           else if (direction === "south"){
@@ -286,7 +284,7 @@ function movePlayer(direction) {
               }
             }
             catch {
-              changeRoom(direction)
+              changeRoom(direction);
             }
           }
           else if (direction === "east"){
@@ -297,7 +295,7 @@ function movePlayer(direction) {
               }
             }
             catch {
-              changeRoom(direction)
+              changeRoom(direction);
             }
           }
           break;
@@ -316,12 +314,12 @@ function changeRoom(direction){
     randomExits();
     exits[0] = oppositeExit;
     for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[i][0])
+      oldExitPos.push(oldRoom[i][0]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
-      currentRoom[i][gridHeight-1] = oldExitPos[i]
+      currentRoom[i][gridHeight-1] = oldExitPos[i];
     }
     for (let i=0; i<gridWidth; i++){
       for (let j=0; j<gridHeight; j++){
@@ -336,12 +334,12 @@ function changeRoom(direction){
     randomExits();
     exits[0] = oppositeExit;
     for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[0][i])
+      oldExitPos.push(oldRoom[0][i]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
-      currentRoom[gridWidth-1][i] = oldExitPos[i]
+      currentRoom[gridWidth-1][i] = oldExitPos[i];
     }
     for (let i=0; i<gridWidth; i++){
       for (let j=0; j<gridHeight; j++){
@@ -356,12 +354,12 @@ function changeRoom(direction){
     randomExits();
     exits[0] = oppositeExit;
     for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[i][gridHeight-1])
+      oldExitPos.push(oldRoom[i][gridHeight-1]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
-      currentRoom[i][0] = oldExitPos[i]
+      currentRoom[i][0] = oldExitPos[i];
     }
     for (let i=0; i<gridWidth; i++){
       for (let j=0; j<gridHeight; j++){
@@ -376,12 +374,12 @@ function changeRoom(direction){
     randomExits();
     exits[0] = oppositeExit;
     for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[gridWidth-1][i])
+      oldExitPos.push(oldRoom[gridWidth-1][i]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
     for (let i=0; i<gridWidth; i++){
-      currentRoom[0][i] = oldExitPos[i]
+      currentRoom[0][i] = oldExitPos[i];
     }
     for (let i=0; i<gridWidth; i++){
       for (let j=0; j<gridHeight; j++){
@@ -418,8 +416,8 @@ function mousePressed() {
   //   mouseY > roomBorder &&
   //   mouseY < height - roomBorder
   // ) {
-    // player.x = mouseX;
-    // player.y = mouseY;
+  //  player.x = mouseX;
+  //  player.y = mouseY;
   // }
 }
 
@@ -433,8 +431,8 @@ function mouseWheel(event) { //darkens or lightens all colors
 }
 
 window.onresize = function() { // if the window gets resized
-  let oldWidth = width;
-  let oldHeight = height;
+  // let oldWidth = width;
+  // let oldHeight = height;
 
   if (windowWidth>windowHeight){
     canvas = createCanvas(windowHeight, windowHeight);
