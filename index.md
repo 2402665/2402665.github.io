@@ -4,7 +4,8 @@
 
 - [Interactive Scene Assignment - Exploration Game](A1-explore)
 - [Arrays/Objects Assignment - Dungeon Discovery](A2-discover)
-- [GRID IMPLEMENTATION FOR ASSIGNMENT 2 (UNFINISHED)](A3-grids)
+- [2D Arrays Assignment - Into The Grid](A3-grids)
+- [Future Assignment - Co-Op](A0-co-op)
 
 ## Demos
 
