@@ -14,7 +14,7 @@
 // Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
-// 
+// Fixed window.onResize() function, now places player correctly when resized and is fully functional
 
 // Known Bugs:
 // When there is an exit in any direction and you move into the walls adjacent to said exit, it may move you into the border and lock your controls. To get out of this situation, move in the opposite direction.
