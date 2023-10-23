@@ -34,6 +34,9 @@ let currentRoom;
 
 let entityScale; // how big entities should be based on window and grid
 
+let playerMovementTime = 0; // time in millis() when player last moved
+let movementCooldown = 200; // cooldown in milliseconds for player movement
+
 let player = { // some parts currently rendered useless as part of the grid integration for now
   x: 0, // x and y will be implemented back into the game at a later date
   y: 0,
@@ -229,21 +232,25 @@ function loadPlayer() {
 function overworldControls() {
   let direction;
   if (state === "overworld") {
-    if (keyIsDown(87) || keyIsDown(38)) {
+    if (keyIsDown(87) && millis() > playerMovementTime + movementCooldown || keyIsDown(38) && millis() > playerMovementTime + movementCooldown) {
       // w or up arrow
       direction = "north";
+      playerMovementTime = millis();
     } 
-    if (keyIsDown(83) || keyIsDown(40)) {
+    if (keyIsDown(83) && millis() > playerMovementTime + movementCooldown || keyIsDown(40) && millis() > playerMovementTime + movementCooldown ) {
       // s or down arrow
       direction = "south";
+      playerMovementTime = millis();
     } 
-    if (keyIsDown(65) || keyIsDown(37)) {
+    if (keyIsDown(65) && millis() > playerMovementTime + movementCooldown || keyIsDown(37) && millis() > playerMovementTime + movementCooldown ) {
       // a or left arrow
       direction = "west";
+      playerMovementTime = millis();
     } 
-    if (keyIsDown(68) || keyIsDown(39)) {
+    if (keyIsDown(68) && millis() > playerMovementTime + movementCooldown || keyIsDown(39) && millis() > playerMovementTime + movementCooldown ) {
       // d or right arrow
       direction = "east";
+      playerMovementTime = millis();
     } 
   }
   movePlayer(direction);
