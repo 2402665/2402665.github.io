@@ -1,4 +1,4 @@
-// Ball Object Notation Demo
+// Ball Object Notation Demo - Array Version
 // Ethan
 // Oct 5
 

@@ -1,9 +1,13 @@
+//makes a chess board, however not a 2D array
+
 function setup() {
   if (windowWidth>windowHeight){
     createCanvas(windowHeight, windowHeight);
-  } else if (windowWidth<windowHeight){
+  } 
+  else if (windowWidth<windowHeight){
     createCanvas(windowWidth, windowWidth);
-  } else {
+  } 
+  else {
     createCanvas(windowWidth, windowHeight);
   }
 }
@@ -17,7 +21,7 @@ function makeBoard(){
   for (let x=0;x<=width;x+=width/8){
     for (let y=0;y<=height;y+=height/8){
       fill(color(decideColor(isBlack)));
-      rect(x,y,width/8,height/8)
+      rect(x,y,width/8,height/8);
       isBlack = !isBlack;
     }
   }
@@ -26,7 +30,8 @@ function makeBoard(){
 function decideColor(decision){
   if (decision){
     return 0;
-  } else {
+  } 
+  else {
     return 255;
   }
 }

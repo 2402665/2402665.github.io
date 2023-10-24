@@ -1,3 +1,5 @@
+// random rectangles and circles demo
+
 let x;
 let y;
 

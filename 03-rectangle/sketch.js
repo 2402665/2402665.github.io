@@ -1,3 +1,5 @@
+// Rectangle Movement Controls Demo
+
 let x;
 let y;
 let w;

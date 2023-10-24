@@ -1,3 +1,5 @@
+// archery target demo
+
 let x;
 let y;
 

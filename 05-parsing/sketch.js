@@ -1,3 +1,5 @@
+// parsing booleans - demonstrating I can read the code - part one
+
 let button = false;
 let x = 50;
 let y = 50;
@@ -11,16 +13,18 @@ function setup() {
 function draw() {
   if (mouseX > x && mouseX < x+w && mouseY > y && mouseY < y+h && mouseIsPressed) {
     button = true;
-  } else {
+  } 
+  else {
     button = false;
   }
   
   if (button) {
     background(255);
     stroke(0);
-    x = mouseX-w/2
-    y = mouseY-h/2
-  } else {
+    x = mouseX-w/2;
+    y = mouseY-h/2;
+  } 
+  else {
     background(0);
     stroke(255);
   }

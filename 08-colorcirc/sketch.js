@@ -1,3 +1,5 @@
+//makes 15 circles in a row with randomizing colors
+
 let y;
 let radius = 10;
 

@@ -1,3 +1,5 @@
+//for loop demo via console.log()
+
 let n=0;
 let maximum=10;
 
@@ -8,7 +10,7 @@ function setup() {
   //   n++;
   // }
   for (let i = 0;i<=10;i++) {
-    console.log(i)
+    console.log(i);
   }
 }
 

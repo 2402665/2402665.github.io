@@ -1,3 +1,5 @@
+//demo for millis()
+
 let theTime;
 let timeScalar;
 

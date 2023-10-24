@@ -1,3 +1,5 @@
+// Bouncing Ball Across X Axis
+
 let x = 26;
 let dx = 2;
 let d = 50;

@@ -1,3 +1,5 @@
+//start screen and "state"s demo
+
 let state = "start screen";
 
 let leftSide = 200;
@@ -13,7 +15,8 @@ function draw() {
   background(220);
   if (state === "start screen") {
     startScreen();
-  } else {
+  } 
+  else {
     background("black");
   }
 }
@@ -34,5 +37,5 @@ function mousePressed() {
 }
 
 function isInRect(x,y,rectX, rectY, rectWidth,rectHeight){
-  return (x >= rectX && x <= rectWidth && y >= rectY && y <= rectHeight)
+  return x >= rectX && x <= rectWidth && y >= rectY && y <= rectHeight;
 }
