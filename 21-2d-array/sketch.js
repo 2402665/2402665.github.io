@@ -5,7 +5,7 @@
 let grid;
 
 let cellSize;
-const GRID_SIZE = 4;
+const GRID_SIZE = 16;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -75,7 +75,7 @@ function keyTyped(){
 }
 
 function mousePressed(){
-  let mousePosition = [];
-  let mouseGridX = mouseX - width % mouseX;
-  //finish tomorrow
+  let mouseGridX = floor(mouseX / cellSize);
+  let mouseGridY = floor(mouseY / cellSize);
+  grid[mouseGridX][mouseGridY] = !grid[mouseGridX][mouseGridY];
 }
