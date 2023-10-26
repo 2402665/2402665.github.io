@@ -31,3 +31,5 @@
 - [Sounds and Images](19-sounds-images)
 - [Terrain Generation](20-terrain)
 - [2D Array Demo](21-2d-array)
+- [Grid Neighbors Assignment](22-neighbors)
+- [Game of Life Activity](23-game-of-life)
