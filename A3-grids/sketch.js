@@ -8,11 +8,11 @@
 // A fresh take on the previous room explorer, redoing the game to be based on a 2D array, adding spawning objects
 // Controls:
 // Use the WSAD or arrow keys to control the tiny block in the middle.
+// Click the mouse in any empty area to teleport the player.
 // Scroll the mouse wheel forward to make all colors darker.
 // Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
-// Used try/catch to try to do things just in case things are undefined or error out
 // Used break to stop loops once a certain condition is filled
 
 // Notes:
@@ -28,8 +28,9 @@ let colorIndex = 3; // total amount of color variables used in code
 let exits = [0,0,0,0];
 let exitScale = 3; // tells how much grid slots an exit takes up
 
-let gridWidth = 10;
-let gridHeight = 10;
+const GRID_SIZE = 10;
+let cellSize;
+
 let currentRoom;
 
 let entityScale; // how big entities should be based on window and grid
@@ -38,36 +39,34 @@ let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
 
 let player = { // some parts currently rendered useless as part of the grid integration for now
-  x: 0, // x and y will be implemented back into the game at a later date
-  y: 0,
   w: 0,
   h: 0,
-  spd: 0, // speed will be implemented back into the game at a later date
   battleX: 0,
   battleY: 0,
   sprite: null,
+  exists: false,
 };
 
 let enemies = [];
-//enemy spawn point index would be 3
+//enemy ID would be 3, elite enemy ID will be 4
 
 let roomObjects = {
   // didn't get into implementing this in time, will be implemented in future update
   // restrictions are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
   treasureChest: {
-    index: 4,
+    ID: 5,
     restrictions: [1,1],
   },
   speedBooster: {
-    index: 5,
+    ID: 6,
     restrictions: [1,1],
   },
   something: {
-    index: 6,
+    ID: 7,
     restrictions: [1,3],
   }, 
   message: {
-    index: 7,
+    ID: 8,
     restrictions: [3,1],
   }, 
 };
@@ -81,22 +80,23 @@ function preload(){
 function setup() {
   if (windowWidth>windowHeight){
     canvas = createCanvas(windowHeight, windowHeight);
+    cellSize = height/GRID_SIZE;
   } 
   else if (windowWidth<windowHeight){
     canvas = createCanvas(windowWidth, windowWidth);
+    cellSize = width/GRID_SIZE;
   } 
   else {
     canvas = createCanvas(windowWidth, windowHeight);
+    cellSize = width/GRID_SIZE;
   }
 
   currentRoom = createRoom();
 
-  entityScale = (width+height) / (gridWidth+gridHeight);
+  entityScale = (width+height) / (GRID_SIZE*2);
 
   player.w = entityScale;
   player.h = entityScale;
-  // player.x = width / 2;
-  // player.y = height / 2;
   player.spd = entityScale / 10;
   
   colors = allNewColors(colorIndex);
@@ -119,18 +119,21 @@ function draw() {
 }
 
 function createRoom() {
-  let table = new Array(gridWidth);
-  for(let i=0; i<gridWidth; i++){
-    if(i===0 || i===gridWidth-1){
-      table[i] = new Array(gridHeight).fill(1);
+  let table = new Array(GRID_SIZE);
+  for(let i=0; i<GRID_SIZE; i++){
+    if(i===0 || i===GRID_SIZE-1){
+      table[i] = new Array(GRID_SIZE).fill(1);
     }
     else {
-      table[i] = new Array(gridHeight).fill(0);
+      table[i] = new Array(GRID_SIZE).fill(0);
       table[i][0] = 1;
-      table[i][gridHeight-1] = 1;
+      table[i][GRID_SIZE-1] = 1;
     }
   }
-  table[gridWidth/2][gridHeight/2] = 2; //player spawn point
+  if (!player.exists){
+    table[GRID_SIZE/2][GRID_SIZE/2] = 2; //player spawn point
+    player.exists = !player.exists;
+  }
   console.log(table);
   return table;
 }
@@ -144,10 +147,10 @@ function loadRoom() {
 
 function displayBorders() {
   fill(color(colors[1]));
-  for (let i=0; i<gridWidth; i++){
-    for (let j=0; j<gridHeight; j++){
+  for (let i=0; i<GRID_SIZE; i++){
+    for (let j=0; j<GRID_SIZE; j++){
       if (currentRoom[i][j]===1){
-        rect(width/gridWidth*j, height/gridHeight*i, width/gridWidth, height/gridHeight);
+        rect(width/GRID_SIZE*j, height/GRID_SIZE*i, width/GRID_SIZE, height/GRID_SIZE);
       }
     }
   }
@@ -160,10 +163,10 @@ function findExits(table) {
 }
 
 function addExits(direction,table){
-  let randomExitPosW = round(random(1,gridWidth-exitScale-1));
-  let randomExitPosH = round(random(1,gridHeight-exitScale-1));
+  let randomExitPosW = round(random(1,GRID_SIZE-exitScale-1));
+  let randomExitPosH = round(random(1,GRID_SIZE-exitScale-1));
   if (direction === 0){
-    for (let i=0; i<gridWidth; i++){
+    for (let i=0; i<GRID_SIZE; i++){
       if (i===randomExitPosW){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
         for (let k=0; k<exitScale; k++){
@@ -173,7 +176,7 @@ function addExits(direction,table){
     }
   }
   else if (direction === 1){
-    for (let j=0; j<gridHeight; j++){
+    for (let j=0; j<GRID_SIZE; j++){
       if (j===randomExitPosH){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
         for (let k=0; k<exitScale; k++){
@@ -183,21 +186,21 @@ function addExits(direction,table){
     }
   }
   else if (direction === 2){
-    for (let i=0; i<gridWidth; i++){
+    for (let i=0; i<GRID_SIZE; i++){
       if (i===randomExitPosW){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
         for (let k=0; k<exitScale; k++){
-          table[i+k][gridHeight-1] = 0;
+          table[i+k][GRID_SIZE-1] = 0;
         }
       }
     }
   }
   else if (direction === 3){
-    for (let j=0; j<gridHeight; j++){
+    for (let j=0; j<GRID_SIZE; j++){
       if (j===randomExitPosH){
         //ADD 0s IN TABLE FOR EXIT POSITIONING
         for (let k=0; k<exitScale; k++){
-          table[gridWidth-1][j+k] = 0;
+          table[GRID_SIZE-1][j+k] = 0;
         }
       }
     }
@@ -219,10 +222,10 @@ function loadEntities() {
 function loadPlayer() {
   push();
   fill(color(colors[2]));
-  for (let i=0; i<gridWidth; i++){
-    for (let j=0; j<gridHeight; j++){
+  for (let i=0; i<GRID_SIZE; i++){
+    for (let j=0; j<GRID_SIZE; j++){
       if (currentRoom[i][j]===2){
-        image(player.sprite, width/gridWidth*j, height/gridHeight*i, width/gridWidth, height/gridHeight);
+        image(player.sprite, width/GRID_SIZE*j, height/GRID_SIZE*i, width/GRID_SIZE, height/GRID_SIZE);
       }
     }
   }
@@ -257,53 +260,58 @@ function overworldControls() {
 }
 
 function movePlayer(direction) {
+  let notMoved = true;
   if (direction){
-    for (let i=0; i<gridWidth; i++){
-      for (let j=0; j<gridHeight; j++){
-        if (currentRoom[i][j]===2){
+    for (let i=0; i<GRID_SIZE; i++){
+      for (let j=0; j<GRID_SIZE; j++){
+        if (currentRoom[i][j]===2 && notMoved){
           if (direction === "north"){
-            try{
+            if (i-1 >= 0){
               if (currentRoom[i-1][j] !== 1){
-                currentRoom[i-1][j] = 2;
                 currentRoom[i][j] = 0;
+                currentRoom[i-1][j] = 2;
               }
             }
-            catch {
+            else {
               changeRoom(direction);
             }
+            notMoved = false;
           }
           else if (direction === "west"){
-            try{
+            if (j-1 >= 0){
               if (currentRoom[i][j-1] !== 1){
-                currentRoom[i][j-1] = 2;
                 currentRoom[i][j] = 0;
+                currentRoom[i][j-1] = 2;
               }
             }
-            catch {
+            else {
               changeRoom(direction);
             }
+            notMoved = false;
           }
           else if (direction === "south"){
-            try{
+            if (i+1 < GRID_SIZE){
               if (currentRoom[i+1][j] !== 1){
-                currentRoom[i+1][j] = 2;
                 currentRoom[i][j] = 0;
+                currentRoom[i+1][j] = 2;
               }
             }
-            catch {
+            else {
               changeRoom(direction);
             }
+            notMoved = false;
           }
           else if (direction === "east"){
-            try{
+            if (j+1 < GRID_SIZE){
               if (currentRoom[i][j+1] !== 1){
-                currentRoom[i][j+1] = 2;
                 currentRoom[i][j] = 0;
+                currentRoom[i][j+1] = 2;
               }
             }
-            catch {
+            else {
               changeRoom(direction);
             }
+            notMoved = false;
           }
           break;
         }
@@ -320,18 +328,18 @@ function changeRoom(direction){
     oppositeExit = 2; //south
     randomExits();
     exits[0] = oppositeExit;
-    for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[i][0]);
+    for (let i=0; i<GRID_SIZE; i++){
+      oldExitPos.push(oldRoom[0][i]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
-    for (let i=0; i<gridWidth; i++){
-      currentRoom[i][gridHeight-1] = oldExitPos[i];
+    for (let i=0; i<GRID_SIZE; i++){
+      currentRoom[GRID_SIZE-1][i] = oldExitPos[i];
     }
-    for (let i=0; i<gridWidth; i++){
-      for (let j=0; j<gridHeight; j++){
+    for (let i=0; i<GRID_SIZE; i++){
+      for (let j=0; j<GRID_SIZE; j++){
         if (oldRoom[i][j]===2){
-          currentRoom[i][gridHeight-1] = 2;
+          currentRoom[GRID_SIZE-1][j] = 2;
         }
       }
     }
@@ -340,60 +348,39 @@ function changeRoom(direction){
     oppositeExit = 3; //east
     randomExits();
     exits[0] = oppositeExit;
-    for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[0][i]);
+    for (let i=0; i<GRID_SIZE; i++){
+      oldExitPos.push(oldRoom[i][0]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
-    for (let i=0; i<gridWidth; i++){
-      currentRoom[gridWidth-1][i] = oldExitPos[i];
-    }
-    for (let i=0; i<gridWidth; i++){
-      for (let j=0; j<gridHeight; j++){
-        if (oldRoom[i][j]===2){
-          currentRoom[gridWidth-1][j] = 2;
-        }
-      }
+    for (let i=0; i<GRID_SIZE; i++){
+      currentRoom[i][GRID_SIZE-1] = oldExitPos[i];
     }
   } 
   else if (direction === "south") {
     oppositeExit = 0; //north
     randomExits();
     exits[0] = oppositeExit;
-    for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[i][gridHeight-1]);
+    for (let i=0; i<GRID_SIZE; i++){
+      oldExitPos.push(oldRoom[GRID_SIZE-1][i]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
-    for (let i=0; i<gridWidth; i++){
-      currentRoom[i][0] = oldExitPos[i];
-    }
-    for (let i=0; i<gridWidth; i++){
-      for (let j=0; j<gridHeight; j++){
-        if (oldRoom[i][j]===2){
-          currentRoom[i][0] = 2;
-        }
-      }
+    for (let i=0; i<GRID_SIZE; i++){
+      currentRoom[0][i] = oldExitPos[i];
     }
   } 
   else if (direction === "east") {
     oppositeExit = 1; //west
     randomExits();
     exits[0] = oppositeExit;
-    for (let i=0; i<gridWidth; i++){
-      oldExitPos.push(oldRoom[gridWidth-1][i]);
+    for (let i=0; i<GRID_SIZE; i++){
+      oldExitPos.push(oldRoom[i][GRID_SIZE-1]);
     }
     currentRoom = createRoom();
     findExits(currentRoom);
-    for (let i=0; i<gridWidth; i++){
-      currentRoom[0][i] = oldExitPos[i];
-    }
-    for (let i=0; i<gridWidth; i++){
-      for (let j=0; j<gridHeight; j++){
-        if (oldRoom[i][j]===2){
-          currentRoom[0][j] = 2;
-        }
-      }
+    for (let i=0; i<GRID_SIZE; i++){
+      currentRoom[i][0] = oldExitPos[i];
     }
   }
   colors = allNewColors(colorIndex);
@@ -416,16 +403,10 @@ function allNewColors(totalColors){
 }
 
 function mousePressed() { 
-  //teleports the player so long as the mouse is in the room.
-  // if (
-  //   mouseX > roomBorder &&
-  //   mouseX < width - roomBorder &&
-  //   mouseY > roomBorder &&
-  //   mouseY < height - roomBorder
-  // ) {
-  //  player.x = mouseX;
-  //  player.y = mouseY;
-  // }
+  let mouseGridX = floor(mouseX / cellSize);
+  let mouseGridY = floor(mouseY / cellSize);
+  //same code from demo 21, next class implement checking that cell selected is empty, then teleport player
+  
 }
 
 function mouseWheel(event) { //darkens or lightens all colors
@@ -438,34 +419,26 @@ function mouseWheel(event) { //darkens or lightens all colors
 }
 
 window.onresize = function() { // if the window gets resized
-  // let oldWidth = width;
-  // let oldHeight = height;
-
   if (windowWidth>windowHeight){
     canvas = createCanvas(windowHeight, windowHeight);
+    cellSize = height/GRID_SIZE;
   } 
   else if (windowWidth<windowHeight){
     canvas = createCanvas(windowWidth, windowWidth);
+    cellSize = width/GRID_SIZE;
   } 
   else {
     canvas = createCanvas(windowWidth, windowHeight);
+    cellSize = width/GRID_SIZE;
   }
 
-  entityScale = (width+height) / (gridWidth+gridHeight);
+  entityScale = (width+height) / (GRID_SIZE*2);
   
   player.w = entityScale;
   player.h = entityScale;
   player.spd = entityScale / 10;
-
-  // let percentOldX = player.x/oldWidth;
-  // let percentOldY = player.y/oldHeight;
-
-  // player.x = percentOldX*width;
-  // player.y = percentOldY*height;
   
   player.spd = entityScale / 10;
-
-
 
 };
 
