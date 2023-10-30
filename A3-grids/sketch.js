@@ -52,22 +52,22 @@ let enemies = [];
 
 let roomObjects = {
   // didn't get into implementing this in time, will be implemented in future update
-  // restrictions are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
+  // restrict are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
   treasureChest: {
     ID: 5,
-    restrictions: [1,1],
+    restrict: [1,1],
   },
   speedBooster: {
     ID: 6,
-    restrictions: [1,1],
+    restrict: [1,1],
   },
   something: {
     ID: 7,
-    restrictions: [1,3],
+    restrict: [1,3],
   }, 
   message: {
     ID: 8,
-    restrictions: [3,1],
+    restrict: [3,1],
   }, 
 };
 
