@@ -2,7 +2,7 @@
 // Computer Science 30
 // 2D Arrays Assignment
 // Finished on October 19 2023
-// Project Name: Exploration Game - Discovery Update
+// Project Name: Exploration Game - Into The Grid
 
 // Project Desription:
 // A fresh take on the previous room explorer, redoing the game to be based on a 2D array, adding spawning objects
@@ -39,8 +39,8 @@ let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
 
 let player = { // some parts currently rendered useless as part of the grid integration for now
-  w: 0,
-  h: 0,
+  x: GRID_SIZE/2,
+  y: GRID_SIZE/2,
   battleX: 0,
   battleY: 0,
   sprite: null,
@@ -94,10 +94,6 @@ function setup() {
   currentRoom = createRoom();
 
   entityScale = (width+height) / (GRID_SIZE*2);
-
-  player.w = entityScale;
-  player.h = entityScale;
-  player.spd = entityScale / 10;
   
   colors = allNewColors(colorIndex);
 
@@ -131,7 +127,7 @@ function createRoom() {
     }
   }
   if (!player.exists){
-    table[GRID_SIZE/2][GRID_SIZE/2] = 2; //player spawn point
+    table[player.x][player.y] = 2; //player spawn point
     player.exists = !player.exists;
   }
   console.log(table);
@@ -233,90 +229,50 @@ function loadPlayer() {
 }
 
 function overworldControls() {
-  let direction;
+  let addedPos = {x: 0, y: 0};
   if (state === "overworld") {
     if (keyIsDown(87) && millis() > playerMovementTime + movementCooldown || keyIsDown(38) && millis() > playerMovementTime + movementCooldown) {
       // w or up arrow
-      direction = "north";
+      addedPos.y = -1;
       playerMovementTime = millis();
     } 
-    if (keyIsDown(83) && millis() > playerMovementTime + movementCooldown || keyIsDown(40) && millis() > playerMovementTime + movementCooldown ) {
+    else if (keyIsDown(83) && millis() > playerMovementTime + movementCooldown || keyIsDown(40) && millis() > playerMovementTime + movementCooldown ) {
       // s or down arrow
-      direction = "south";
+      addedPos.y = 1;
       playerMovementTime = millis();
     } 
-    if (keyIsDown(65) && millis() > playerMovementTime + movementCooldown || keyIsDown(37) && millis() > playerMovementTime + movementCooldown ) {
+    else if (keyIsDown(65) && millis() > playerMovementTime + movementCooldown || keyIsDown(37) && millis() > playerMovementTime + movementCooldown ) {
       // a or left arrow
-      direction = "west";
+      addedPos.x = -1;
       playerMovementTime = millis();
     } 
-    if (keyIsDown(68) && millis() > playerMovementTime + movementCooldown || keyIsDown(39) && millis() > playerMovementTime + movementCooldown ) {
+    else if (keyIsDown(68) && millis() > playerMovementTime + movementCooldown || keyIsDown(39) && millis() > playerMovementTime + movementCooldown ) {
       // d or right arrow
-      direction = "east";
+      addedPos.x = 1;
       playerMovementTime = millis();
     } 
   }
-  movePlayer(direction);
+  movePlayer(addedPos);
 }
 
-function movePlayer(direction) {
-  let notMoved = true;
-  if (direction){
-    for (let i=0; i<GRID_SIZE; i++){
-      for (let j=0; j<GRID_SIZE; j++){
-        if (currentRoom[i][j]===2 && notMoved){
-          if (direction === "north"){
-            if (i-1 >= 0){
-              if (currentRoom[i-1][j] !== 1){
-                currentRoom[i][j] = 0;
-                currentRoom[i-1][j] = 2;
-              }
-            }
-            else {
-              changeRoom(direction);
-            }
-            notMoved = false;
-          }
-          else if (direction === "west"){
-            if (j-1 >= 0){
-              if (currentRoom[i][j-1] !== 1){
-                currentRoom[i][j] = 0;
-                currentRoom[i][j-1] = 2;
-              }
-            }
-            else {
-              changeRoom(direction);
-            }
-            notMoved = false;
-          }
-          else if (direction === "south"){
-            if (i+1 < GRID_SIZE){
-              if (currentRoom[i+1][j] !== 1){
-                currentRoom[i][j] = 0;
-                currentRoom[i+1][j] = 2;
-              }
-            }
-            else {
-              changeRoom(direction);
-            }
-            notMoved = false;
-          }
-          else if (direction === "east"){
-            if (j+1 < GRID_SIZE){
-              if (currentRoom[i][j+1] !== 1){
-                currentRoom[i][j] = 0;
-                currentRoom[i][j+1] = 2;
-              }
-            }
-            else {
-              changeRoom(direction);
-            }
-            notMoved = false;
-          }
-          break;
-        }
-      }
-    }
+function movePlayer(addedPos) {
+  if (player.y + addedPos.y < 0){ // if going into north exit
+    changeRoom("north");
+  }
+  else if (player.y + addedPos.y >= GRID_SIZE){ // if going to south exit
+    changeRoom("south");
+  }
+  else if (player.x + addedPos.x < 0){ // if going to west exit
+    changeRoom("west");
+  }
+  else if (player.x + addedPos.x >= GRID_SIZE){ // if going to east exit
+    changeRoom("east");
+  }
+  else if (currentRoom[player.y + addedPos.y][player.x + addedPos.x] === 0){ // if not running into something
+    currentRoom[player.y][player.x] = 0;
+    currentRoom[player.y + addedPos.y][player.x + addedPos.x] = 2;
+    player.y += addedPos.y;
+    player.x += addedPos.x;
   }
 }
 
@@ -336,13 +292,7 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       currentRoom[GRID_SIZE-1][i] = oldExitPos[i];
     }
-    for (let i=0; i<GRID_SIZE; i++){
-      for (let j=0; j<GRID_SIZE; j++){
-        if (oldRoom[i][j]===2){
-          currentRoom[GRID_SIZE-1][j] = 2;
-        }
-      }
-    }
+    player.y = GRID_SIZE-1;
   } 
   else if (direction === "west") {
     oppositeExit = 3; //east
@@ -356,6 +306,8 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       currentRoom[i][GRID_SIZE-1] = oldExitPos[i];
     }
+    
+    player.x = GRID_SIZE-1;
   } 
   else if (direction === "south") {
     oppositeExit = 0; //north
@@ -369,6 +321,7 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       currentRoom[0][i] = oldExitPos[i];
     }
+    player.y = 0;
   } 
   else if (direction === "east") {
     oppositeExit = 1; //west
@@ -382,6 +335,7 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       currentRoom[i][0] = oldExitPos[i];
     }
+    player.x = 0;
   }
   colors = allNewColors(colorIndex);
 }
@@ -406,7 +360,13 @@ function mousePressed() {
   let mouseGridX = floor(mouseX / cellSize);
   let mouseGridY = floor(mouseY / cellSize);
   //same code from demo 21, next class implement checking that cell selected is empty, then teleport player
-  
+  // very buggy, fix next class
+  if (currentRoom[mouseGridY][mouseGridX] === 0){
+    currentRoom[player.y][player.x] === 0;
+    currentRoom[mouseGridY][mouseGridX] === 2;
+    player.x = mouseGridX;
+    player.y = mouseGridY;
+  }
 }
 
 function mouseWheel(event) { //darkens or lightens all colors
