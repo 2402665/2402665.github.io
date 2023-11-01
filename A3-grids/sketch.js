@@ -28,7 +28,7 @@ let colorIndex = 3; // total amount of color variables used in code
 let exits = [0,0,0,0];
 let exitScale = 3; // tells how much grid slots an exit takes up
 
-const GRID_SIZE = 10;
+const GRID_SIZE = 12;
 let cellSize;
 
 let currentRoom;
@@ -231,26 +231,28 @@ function loadPlayer() {
 function overworldControls() {
   let addedPos = {x: 0, y: 0};
   if (state === "overworld") {
-    if (keyIsDown(87) && millis() > playerMovementTime + movementCooldown || keyIsDown(38) && millis() > playerMovementTime + movementCooldown) {
-      // w or up arrow
-      addedPos.y = -1;
-      playerMovementTime = millis();
-    } 
-    else if (keyIsDown(83) && millis() > playerMovementTime + movementCooldown || keyIsDown(40) && millis() > playerMovementTime + movementCooldown ) {
-      // s or down arrow
-      addedPos.y = 1;
-      playerMovementTime = millis();
-    } 
-    else if (keyIsDown(65) && millis() > playerMovementTime + movementCooldown || keyIsDown(37) && millis() > playerMovementTime + movementCooldown ) {
-      // a or left arrow
-      addedPos.x = -1;
-      playerMovementTime = millis();
-    } 
-    else if (keyIsDown(68) && millis() > playerMovementTime + movementCooldown || keyIsDown(39) && millis() > playerMovementTime + movementCooldown ) {
-      // d or right arrow
-      addedPos.x = 1;
-      playerMovementTime = millis();
-    } 
+    if (millis() > playerMovementTime + movementCooldown){
+      if (keyIsDown(87)  || keyIsDown(38) ) {
+        // w or up arrow
+        addedPos.y = -1;
+        playerMovementTime = millis();
+      } 
+      else if (keyIsDown(83)  || keyIsDown(40)  ) {
+        // s or down arrow
+        addedPos.y = 1;
+        playerMovementTime = millis();
+      } 
+      else if (keyIsDown(65)  || keyIsDown(37)  ) {
+        // a or left arrow
+        addedPos.x = -1;
+        playerMovementTime = millis();
+      } 
+      else if (keyIsDown(68)  || keyIsDown(39)  ) {
+        // d or right arrow
+        addedPos.x = 1;
+        playerMovementTime = millis();
+      } 
+    }
   }
   movePlayer(addedPos);
 }
@@ -359,11 +361,9 @@ function allNewColors(totalColors){
 function mousePressed() { 
   let mouseGridX = floor(mouseX / cellSize);
   let mouseGridY = floor(mouseY / cellSize);
-  //same code from demo 21, next class implement checking that cell selected is empty, then teleport player
-  // very buggy, fix next class
   if (currentRoom[mouseGridY][mouseGridX] === 0){
-    currentRoom[player.y][player.x] === 0;
-    currentRoom[mouseGridY][mouseGridX] === 2;
+    currentRoom[player.y][player.x] = 0;
+    currentRoom[mouseGridY][mouseGridX] = 2;
     player.x = mouseGridX;
     player.y = mouseGridY;
   }
