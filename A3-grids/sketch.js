@@ -1,22 +1,22 @@
 // Ethan Heshka
 // Computer Science 30
 // 2D Arrays Assignment
-// Finished on October 19 2023
+// Finished on November 10 2023
 // Project Name: Exploration Game - Into The Grid
 
 // Project Desription:
-// A fresh take on the previous room explorer, redoing the game to be based on a 2D array, adding spawning objects
+// A fresh take on the previous room explorer, redoing the game to be based on a 2D array
 // Controls:
-// Use the WSAD or arrow keys to control the tiny block in the middle.
-// Click the mouse in any empty area to teleport the player.
+// Use the WSAD or arrow keys to control Link.
+// Click the mouse in any empty area to teleport the player to that area.
 // Scroll the mouse wheel forward to make all colors darker.
 // Scroll the mouse wheel backward to make all colors lighter.
 
 // Extras for Experts:
-// Used break to stop loops once a certain condition is filled
+// 
 
 // Notes:
-// Originally, it was planned to have a combat system in the game. This became scrapped, and might be added at a later date. Hence there is some remaining code where the combat system would need pieces implemented to work.
+// Many "states" are present in the code, but for right now only the title screen and explore will trigger.
 // north = 0, west = 1, south = 2, east = 3
 
 // Code:
@@ -33,12 +33,10 @@ let cellSize;
 
 let currentRoom;
 
-let entityScale; // how big entities should be based on window and grid
-
 let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
 
-let player = { // some parts currently rendered useless as part of the grid integration for now
+let player = {
   x: GRID_SIZE/2,
   y: GRID_SIZE/2,
   battleX: 0,
@@ -47,12 +45,29 @@ let player = { // some parts currently rendered useless as part of the grid inte
   exists: false,
 };
 
-let enemies = [];
-//enemy ID would be 3, elite enemy ID will be 4
+let enemies = { // for future update
+  // eID = enemy ID
+  octorok: {
+    eID: 1, 
+    restrict: [1,1],
+  },
+};
 
-let roomObjects = {
+let elites = { // for future update
+  mario: {
+    eID: 98,
+    restrict: [1,2],
+  },
+  luigi: {
+    eID: 99,
+    restrict: [1,2],
+  },
+};
+
+const roomObjects = {
   // didn't get into implementing this in time, will be implemented in future update
   // restrict are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
+  enemy: {enemies},
   treasureChest: {
     ID: 5,
     restrict: [1,1],
@@ -71,10 +86,23 @@ let roomObjects = {
   }, 
 };
 
-let state = "overworld";
+let imageAssets = {
+  player: null,
+  octorok: null,
+  mario: null,
+  luigi: null,
+  title: null,
+  treasureChest: null,
+  speedBooster: null,
+  something: null,
+  message: null,
+};
+
+let state = "explore";
 
 function preload(){
   player.sprite = loadImage("link_temporary.png");
+  imageAssets.title = loadImage("title.png");
 }
 
 function setup() {
@@ -92,8 +120,6 @@ function setup() {
   }
 
   currentRoom = createRoom();
-
-  entityScale = (width+height) / (GRID_SIZE*2);
   
   colors = allNewColors(colorIndex);
 
@@ -104,14 +130,33 @@ function setup() {
 }
 
 function draw() {
-  if (state === "overworld") {
-    // If the player is not in combat
+  // if (state === "start"){
+  //   // If on the start screen
+  //   loadStartScreen();
+  // }
+  // else if (state === "save") {
+  //   // If picking a save file
+    
+  // } 
+  if (state === "explore") {
+    // If exploring
     loadRoom();
     overworldControls();
   } 
+  else if (state === "menu") {
+    // If in the player menu
+
+  } 
   else if (state === "battle") {
+    // If entered a battle
     loadBattle();
   }
+}
+
+function loadStartScreen(){
+  background(0);
+  push();
+
 }
 
 function createRoom() {
@@ -230,7 +275,7 @@ function loadPlayer() {
 
 function overworldControls() {
   let addedPos = {x: 0, y: 0};
-  if (state === "overworld") {
+  if (state === "explore") {
     if (millis() > playerMovementTime + movementCooldown){
       if (keyIsDown(87)  || keyIsDown(38) ) {
         // w or up arrow
@@ -391,15 +436,6 @@ window.onresize = function() { // if the window gets resized
     canvas = createCanvas(windowWidth, windowHeight);
     cellSize = width/GRID_SIZE;
   }
-
-  entityScale = (width+height) / (GRID_SIZE*2);
-  
-  player.w = entityScale;
-  player.h = entityScale;
-  player.spd = entityScale / 10;
-  
-  player.spd = entityScale / 10;
-
 };
 
 function randomizeObjPos(){
