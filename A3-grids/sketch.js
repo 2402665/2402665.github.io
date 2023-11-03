@@ -28,46 +28,51 @@ let colorIndex = 3; // total amount of color variables used in code
 let exits = [0,0,0,0];
 let exitScale = 3; // tells how much grid slots an exit takes up
 
-const GRID_SIZE = 12;
-let cellSize;
+const GRID_SIZE = 12; // how wide/tall the grid will be
+let cellSize; // will turn into a x/y value for scaling later
 
-let currentRoom;
+let currentRoom; // will turn into a 2D array later
 
 let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
 
-let player = {
-  x: GRID_SIZE/2,
-  y: GRID_SIZE/2,
-  battleX: 0,
-  battleY: 0,
-  sprite: null,
-  exists: false,
+let player = { // player values
+  x: GRID_SIZE/2, // x value in relevance to grid
+  y: GRID_SIZE/2, // y value in relevance to grid
+  battleX: 0, // x value during combat
+  battleY: 0, // y value during combat
+  exists: false, // a check to see if player already exists when loading a room, only used at the start of the game
 };
 
-let enemies = { // for future update
+const enemies = { // for future update
+  // spawnID = the ID for an enemy spawn point, used in currentRoom
+  // enemies themselves will not show up on the grid
+  // however when checking if running into an enemy, it 
   // eID = enemy ID
+  // restrict are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
+  spawnID: 3,
   octorok: {
     eID: 1, 
     restrict: [1,1],
   },
 };
 
-let elites = { // for future update
+const elites = { // for future update
+  // elites are special enemies, will be much stronger than normal enemies
+  // may very rarely spawn in standard rooms, other times will have designated boss rooms
+  spawnID: 4,
   mario: {
-    eID: 98,
+    eID: 1,
     restrict: [1,2],
   },
   luigi: {
-    eID: 99,
+    eID: 2,
     restrict: [1,2],
   },
 };
 
-const roomObjects = {
-  // didn't get into implementing this in time, will be implemented in future update
-  // restrict are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
-  enemy: {enemies},
+const roomObjects = { // for future update
+  // other objects in the game that can be used at different times
   treasureChest: {
     ID: 5,
     restrict: [1,1],
@@ -86,7 +91,7 @@ const roomObjects = {
   }, 
 };
 
-let imageAssets = {
+let imageAssets = { // list of all sprites/spritesheets in the game
   player: null,
   octorok: null,
   mario: null,
@@ -98,10 +103,10 @@ let imageAssets = {
   message: null,
 };
 
-let state = "explore";
+let state = "explore"; // current state of game
 
 function preload(){
-  player.sprite = loadImage("link_temporary.png");
+  imageAssets.player = loadImage("link_temporary.png");
   imageAssets.title = loadImage("title.png");
 }
 
@@ -130,17 +135,17 @@ function setup() {
 }
 
 function draw() {
-  // if (state === "start"){
-  //   // If on the start screen
-  //   loadStartScreen();
-  // }
-  // else if (state === "save") {
-  //   // If picking a save file
+  if (state === "start"){
+    // If on the start screen
+    loadStartScreen();
+  }
+  else if (state === "save") {
+    // If picking a save file
     
-  // } 
-  if (state === "explore") {
+  } 
+  else if (state === "explore") {
     // If exploring
-    loadRoom();
+    displayRoom();
     overworldControls();
   } 
   else if (state === "menu") {
@@ -179,7 +184,7 @@ function createRoom() {
   return table;
 }
 
-function loadRoom() {
+function displayRoom() {
   background(color(colors[0]));
   noStroke();
   displayBorders();
@@ -191,25 +196,27 @@ function displayBorders() {
   for (let i=0; i<GRID_SIZE; i++){
     for (let j=0; j<GRID_SIZE; j++){
       if (currentRoom[i][j]===1){
-        rect(width/GRID_SIZE*j, height/GRID_SIZE*i, width/GRID_SIZE, height/GRID_SIZE);
+        rect(cellSize*j, cellSize*i, cellSize, cellSize);
       }
     }
   }
 }
 
-function findExits(table) {
+function findExits(table) { // for each exit, uses addExits
   for (let exit of exits){
     addExits(exit,table);
   }
 }
 
-function addExits(direction,table){
-  let randomExitPosW = round(random(1,GRID_SIZE-exitScale-1));
-  let randomExitPosH = round(random(1,GRID_SIZE-exitScale-1));
+function addExits(direction,table){ // adds an exit to a given 2D array
+  // creates a random position for the exit to exist in on the grid
+  let randomExitPos = round(random(1,GRID_SIZE-exitScale-1));
+  
+  // depending on direction of exit, use randomExitPos to create the exit on the grid
   if (direction === 0){
     for (let i=0; i<GRID_SIZE; i++){
-      if (i===randomExitPosW){
-        //ADD 0s IN TABLE FOR EXIT POSITIONING
+      if (i===randomExitPos){
+        // adds 0s in table to create the exit
         for (let k=0; k<exitScale; k++){
           table[i+k][0] = 0;
         }
@@ -218,8 +225,8 @@ function addExits(direction,table){
   }
   else if (direction === 1){
     for (let j=0; j<GRID_SIZE; j++){
-      if (j===randomExitPosH){
-        //ADD 0s IN TABLE FOR EXIT POSITIONING
+      if (j===randomExitPos){
+        // adds 0s in table to create the exit
         for (let k=0; k<exitScale; k++){
           table[0][j+k] = 0;
         }
@@ -228,8 +235,8 @@ function addExits(direction,table){
   }
   else if (direction === 2){
     for (let i=0; i<GRID_SIZE; i++){
-      if (i===randomExitPosW){
-        //ADD 0s IN TABLE FOR EXIT POSITIONING
+      if (i===randomExitPos){
+        // adds 0s in table to create the exit
         for (let k=0; k<exitScale; k++){
           table[i+k][GRID_SIZE-1] = 0;
         }
@@ -238,8 +245,8 @@ function addExits(direction,table){
   }
   else if (direction === 3){
     for (let j=0; j<GRID_SIZE; j++){
-      if (j===randomExitPosH){
-        //ADD 0s IN TABLE FOR EXIT POSITIONING
+      if (j===randomExitPos){
+        // adds 0s in table to create the exit
         for (let k=0; k<exitScale; k++){
           table[GRID_SIZE-1][j+k] = 0;
         }
@@ -249,28 +256,20 @@ function addExits(direction,table){
 }
 
 function randomExits() {
+  // randomizes exits
   for (let i=0; i<exits.length; i++){
     exits[i] = floor(random(4));
   }
-
 }
 
 function loadEntities() {
   // if there were multiple entities, for example a treasure chest or enemy, they would have their seperate functions loaded here.
   loadPlayer();
+
 }
 
 function loadPlayer() {
-  push();
-  fill(color(colors[2]));
-  for (let i=0; i<GRID_SIZE; i++){
-    for (let j=0; j<GRID_SIZE; j++){
-      if (currentRoom[i][j]===2){
-        image(player.sprite, width/GRID_SIZE*j, height/GRID_SIZE*i, width/GRID_SIZE, height/GRID_SIZE);
-      }
-    }
-  }
-  pop();
+  image(imageAssets.player, cellSize*player.x, cellSize*player.y, cellSize, cellSize);
 }
 
 function overworldControls() {
@@ -303,6 +302,8 @@ function overworldControls() {
 }
 
 function movePlayer(addedPos) {
+  // moves the player
+  // moves into a new room given if player left the room
   if (player.y + addedPos.y < 0){ // if going into north exit
     changeRoom("north");
   }
@@ -324,6 +325,8 @@ function movePlayer(addedPos) {
 }
 
 function changeRoom(direction){
+  // creates a new room based on which exit the player took
+  // done by copying the row/column of the exit taken, then placing that same row/column on the other side of a newly generated room
   let oppositeExit;
   let oldRoom = structuredClone(currentRoom);
   let oldExitPos = [];
@@ -353,7 +356,6 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       currentRoom[i][GRID_SIZE-1] = oldExitPos[i];
     }
-    
     player.x = GRID_SIZE-1;
   } 
   else if (direction === "south") {
@@ -395,6 +397,7 @@ function randomColor() {
 }
 
 function allNewColors(totalColors){
+  // expands randomColor() to a function that can make multiple colors in a table
   let newColorTable = [];
   for (let i = 0; i < totalColors; i++){
     let newColor = randomColor();
@@ -404,17 +407,24 @@ function allNewColors(totalColors){
 }
 
 function mousePressed() { 
-  let mouseGridX = floor(mouseX / cellSize);
-  let mouseGridY = floor(mouseY / cellSize);
-  if (currentRoom[mouseGridY][mouseGridX] === 0){
-    currentRoom[player.y][player.x] = 0;
-    currentRoom[mouseGridY][mouseGridX] = 2;
-    player.x = mouseGridX;
-    player.y = mouseGridY;
+  if (state === "explore"){
+    // teleports player to location on the grid
+    let mouseGridX = floor(mouseX / cellSize);
+    let mouseGridY = floor(mouseY / cellSize);
+    if (currentRoom[mouseGridY][mouseGridX] === 0){
+      currentRoom[player.y][player.x] = 0;
+      currentRoom[mouseGridY][mouseGridX] = 2;
+      player.x = mouseGridX;
+      player.y = mouseGridY;
+    }
+  }
+  else if (state === "battle"){
+    // activate some battle button, depending on where clicked
   }
 }
 
-function mouseWheel(event) { //darkens or lightens all colors
+function mouseWheel(event) { 
+  //darkens or lightens all colors
   // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
   for (let aColor of colors){
     for (let i=0; i<aColor.length; i++){
@@ -438,30 +448,30 @@ window.onresize = function() { // if the window gets resized
   }
 };
 
-function randomizeObjPos(){
-
+function randomizeObjPos(objectTable){
+  // a function that would randomize where objects are positioned given a table of object IDs, returns a table of positions
 }
 
-function loadBattle(){
+function loadBattle(){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
 
-function loadEnemies(){
+function loadEnemies(){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
 
-function createEnemy(){
+function createEnemy(){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
 
-function battleControls(){
+function battleControls(){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
 
-function battleUI(){
+function battleUI(){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
 
-function battleButton(){
+function battleButton(button){ // future function
   text("How are you seeing this?",0,0,width,height/5);
 }
