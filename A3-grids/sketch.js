@@ -16,7 +16,7 @@
 // 
 
 // Notes:
-// Many "states" are present in the code, but for right now only the title screen and explore will trigger.
+// Many "states" are present in the code, but for right now only "explore" will trigger.
 // north = 0, west = 1, south = 2, east = 3
 
 // Code:
@@ -28,7 +28,7 @@ let colorIndex = 3; // total amount of color variables used in code
 let exits = [0,0,0,0];
 let exitScale = 3; // tells how much grid slots an exit takes up
 
-const GRID_SIZE = 12; // how wide/tall the grid will be
+const GRID_SIZE = 12; // how wide/tall the grid will be, game still functions if changed though will break if extremely small value
 let cellSize; // will turn into a x/y value for scaling later
 
 let currentRoom; // will turn into a 2D array later
@@ -41,7 +41,6 @@ let player = { // player values
   y: GRID_SIZE/2, // y value in relevance to grid
   battleX: 0, // x value during combat
   battleY: 0, // y value during combat
-  exists: false, // a check to see if player already exists when loading a room, only used at the start of the game
 };
 
 const enemies = { // for future update
@@ -106,8 +105,8 @@ let imageAssets = { // list of all sprites/spritesheets in the game
 let state = "explore"; // current state of game
 
 function preload(){
-  imageAssets.player = loadImage("link_temporary.png");
-  imageAssets.title = loadImage("title.png");
+  imageAssets.player = loadImage("assets/images/link_temporary.png");
+  imageAssets.title = loadImage("assets/images/title.png");
 }
 
 function setup() {
@@ -175,10 +174,6 @@ function createRoom() {
       table[i][0] = 1;
       table[i][GRID_SIZE-1] = 1;
     }
-  }
-  if (!player.exists){
-    table[player.x][player.y] = 2; //player spawn point
-    player.exists = !player.exists;
   }
   console.log(table);
   return table;
@@ -317,8 +312,6 @@ function movePlayer(addedPos) {
     changeRoom("east");
   }
   else if (currentRoom[player.y + addedPos.y][player.x + addedPos.x] === 0){ // if not running into something
-    currentRoom[player.y][player.x] = 0;
-    currentRoom[player.y + addedPos.y][player.x + addedPos.x] = 2;
     player.y += addedPos.y;
     player.x += addedPos.x;
   }
