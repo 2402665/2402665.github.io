@@ -96,17 +96,19 @@ let imageAssets = { // list of all sprites/spritesheets in the game
   mario: null,
   luigi: null,
   title: null,
+  clicktostart: null,
   treasureChest: null,
   speedBooster: null,
   something: null,
   message: null,
 };
 
-let state = "explore"; // current state of game
+let state = "start"; // current state of game
 
 function preload(){
   imageAssets.player = loadImage("assets/images/link_temporary.png");
   imageAssets.title = loadImage("assets/images/title.png");
+  imageAssets.clicktostart = loadImage("assets/images/click-to-start.png");
 }
 
 function setup() {
@@ -123,6 +125,9 @@ function setup() {
     cellSize = width/GRID_SIZE;
   }
 
+  imageMode(CENTER);
+  rectMode(CENTER);
+
   currentRoom = createRoom();
   
   colors = allNewColors(colorIndex);
@@ -130,7 +135,6 @@ function setup() {
   randomExits();
 
   findExits(currentRoom);
-
 }
 
 function draw() {
@@ -139,7 +143,7 @@ function draw() {
     loadStartScreen();
   }
   else if (state === "save") {
-    // If picking a save file
+    // If picking a save file (future update)
     
   } 
   else if (state === "explore") {
@@ -148,19 +152,19 @@ function draw() {
     overworldControls();
   } 
   else if (state === "menu") {
-    // If in the player menu
+    // If in the player menu (future update)
 
   } 
   else if (state === "battle") {
-    // If entered a battle
+    // If entered a battle (future update)
     loadBattle();
   }
 }
 
 function loadStartScreen(){
   background(0);
-  push();
-
+  image(imageAssets.title, width/2, height/2, width-cellSize, cellSize/1.5);
+  image(imageAssets.clicktostart, width/2, height-cellSize, width/2, cellSize/2);
 }
 
 function createRoom() {
@@ -191,7 +195,7 @@ function displayBorders() {
   for (let i=0; i<GRID_SIZE; i++){
     for (let j=0; j<GRID_SIZE; j++){
       if (currentRoom[i][j]===1){
-        rect(cellSize*j, cellSize*i, cellSize, cellSize);
+        rect(cellSize*j+cellSize/2, cellSize*i+cellSize/2, cellSize, cellSize);
       }
     }
   }
@@ -203,49 +207,33 @@ function findExits(table) { // for each exit, uses addExits
   }
 }
 
-function addExits(direction,table){ // adds an exit to a given 2D array
+function addExits(direction,table){ // adds an "exit" to a given 2D array
   // creates a random position for the exit to exist in on the grid
   let randomExitPos = round(random(1,GRID_SIZE-exitScale-1));
   
   // depending on direction of exit, use randomExitPos to create the exit on the grid
   if (direction === 0){
-    for (let i=0; i<GRID_SIZE; i++){
-      if (i===randomExitPos){
-        // adds 0s in table to create the exit
-        for (let k=0; k<exitScale; k++){
-          table[i+k][0] = 0;
-        }
-      }
+    // adds 0s in table to create the exit
+    for (let k=0; k<exitScale; k++){
+      table[randomExitPos+k][0] = 0;
     }
   }
   else if (direction === 1){
-    for (let j=0; j<GRID_SIZE; j++){
-      if (j===randomExitPos){
-        // adds 0s in table to create the exit
-        for (let k=0; k<exitScale; k++){
-          table[0][j+k] = 0;
-        }
-      }
+    // adds 0s in table to create the exit
+    for (let k=0; k<exitScale; k++){
+      table[0][randomExitPos+k] = 0;
     }
   }
   else if (direction === 2){
-    for (let i=0; i<GRID_SIZE; i++){
-      if (i===randomExitPos){
-        // adds 0s in table to create the exit
-        for (let k=0; k<exitScale; k++){
-          table[i+k][GRID_SIZE-1] = 0;
-        }
-      }
+    // adds 0s in table to create the exit
+    for (let k=0; k<exitScale; k++){
+      table[randomExitPos+k][GRID_SIZE-1] = 0;
     }
   }
   else if (direction === 3){
-    for (let j=0; j<GRID_SIZE; j++){
-      if (j===randomExitPos){
-        // adds 0s in table to create the exit
-        for (let k=0; k<exitScale; k++){
-          table[GRID_SIZE-1][j+k] = 0;
-        }
-      }
+    // adds 0s in table to create the exit
+    for (let k=0; k<exitScale; k++){
+      table[GRID_SIZE-1][randomExitPos+k] = 0;
     }
   }
 }
@@ -264,29 +252,29 @@ function loadEntities() {
 }
 
 function loadPlayer() {
-  image(imageAssets.player, cellSize*player.x, cellSize*player.y, cellSize, cellSize);
+  image(imageAssets.player, cellSize*player.x+cellSize/2, cellSize*player.y+cellSize/2, cellSize, cellSize);
 }
 
 function overworldControls() {
   let addedPos = {x: 0, y: 0};
   if (state === "explore") {
     if (millis() > playerMovementTime + movementCooldown){
-      if (keyIsDown(87)  || keyIsDown(38) ) {
+      if (keyIsDown(87) || keyIsDown(38) ) {
         // w or up arrow
         addedPos.y = -1;
         playerMovementTime = millis();
       } 
-      else if (keyIsDown(83)  || keyIsDown(40)  ) {
+      else if (keyIsDown(83) || keyIsDown(40)  ) {
         // s or down arrow
         addedPos.y = 1;
         playerMovementTime = millis();
       } 
-      else if (keyIsDown(65)  || keyIsDown(37)  ) {
+      else if (keyIsDown(65) || keyIsDown(37)  ) {
         // a or left arrow
         addedPos.x = -1;
         playerMovementTime = millis();
       } 
-      else if (keyIsDown(68)  || keyIsDown(39)  ) {
+      else if (keyIsDown(68) || keyIsDown(39)  ) {
         // d or right arrow
         addedPos.x = 1;
         playerMovementTime = millis();
@@ -400,7 +388,10 @@ function allNewColors(totalColors){
 }
 
 function mousePressed() { 
-  if (state === "explore"){
+  if (state === "start"){
+    state = "explore";
+  }
+  else if (state === "explore"){
     // teleports player to location on the grid
     let mouseGridX = floor(mouseX / cellSize);
     let mouseGridY = floor(mouseY / cellSize);
@@ -416,7 +407,7 @@ function mousePressed() {
   }
 }
 
-function mouseWheel(event) { 
+function mouseWheel(event) { // will be scrapped in future versions where images are used instead of colors
   //darkens or lightens all colors
   // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
   for (let aColor of colors){
@@ -441,7 +432,7 @@ window.onresize = function() { // if the window gets resized
   }
 };
 
-function randomizeObjPos(objectTable){
+function randomizeObjPos(objectTable){ // future function
   // a function that would randomize where objects are positioned given a table of object IDs, returns a table of positions
 }
 
