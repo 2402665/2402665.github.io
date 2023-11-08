@@ -21,6 +21,8 @@
 
 // Code:
 
+let canvas3D;
+
 let colors = []; // adds in variables later
 let colorIndex = 3; // total amount of color variables used in code
 // 0 = background, 1 = border, 2 = player (currently unused due to player now an image)
@@ -165,6 +167,12 @@ function loadStartScreen(){
   background(0);
   image(imageAssets.title, width/2, height/2, width-cellSize, cellSize/1.5);
   image(imageAssets.clicktostart, width/2, height-cellSize, width/2, cellSize/2);
+  // drawFloatingCube();
+  // drawFloatingCube();
+}
+
+function drawFloatingCube(texture){
+  
 }
 
 function createRoom() {
