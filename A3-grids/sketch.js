@@ -21,8 +21,6 @@
 
 // Code:
 
-let canvas3D;
-
 let colors = []; // adds in variables later
 let colorIndex = 3; // total amount of color variables used in code
 // 0 = background, 1 = border, 2 = player (currently unused due to player now an image)
@@ -33,7 +31,7 @@ let exitScale = 3; // tells how much grid slots an exit takes up
 const GRID_SIZE = 12; // how wide/tall the grid will be, game still functions if changed though will break if extremely small value
 let cellSize; // will turn into a x/y value for scaling later
 
-let currentRoom; // will turn into a 2D array later
+let loadedRoom; // will turn into a 2D array later
 
 let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
@@ -46,9 +44,9 @@ let player = { // player values
 };
 
 const enemies = { // for future update
-  // spawnID = the ID for an enemy spawn point, used in currentRoom
+  // spawnID = the ID for an enemy spawn point, used in loadedRoom
   // enemies themselves will not show up on the grid
-  // however when checking if running into an enemy, it 
+  // however when checking if running into an enemy, it will look at the player and enemy x/y values
   // eID = enemy ID
   // restrict are the width and height of the object in relevance to the grid; [3,1] means 3 grid blocks long and 1 grid block tall
   spawnID: 3,
@@ -105,12 +103,36 @@ let imageAssets = { // list of all sprites/spritesheets in the game
   message: null,
 };
 
+let bgm = {
+  title: null,
+  overworld: null,
+};
+
+let sfx = {
+  click: null,
+  footstep: null,
+  hit_wall: null,
+};
+
 let state = "start"; // current state of game
 
 function preload(){
+  // load images
   imageAssets.player = loadImage("assets/images/link_temporary.png");
   imageAssets.title = loadImage("assets/images/title.png");
   imageAssets.clicktostart = loadImage("assets/images/click-to-start.png");
+
+  // load background music
+  bgm.title = loadSound("assets/bgm/title.mp3");
+  bgm.title.setVolume(0.5);
+  bgm.overworld = loadSound("assets/bgm/overworld.mp3");
+  bgm.overworld.setVolume(0.5);
+
+
+  // load sound effects
+  sfx.click = loadSound("assets/sfx/click.wav");
+  sfx.footstep = loadSound("assets/sfx/footstep.wav");
+  sfx.hit_wall = loadSound("assets/sfx/hit_wall.wav");
 }
 
 function setup() {
@@ -130,13 +152,13 @@ function setup() {
   imageMode(CENTER);
   rectMode(CENTER);
 
-  currentRoom = createRoom();
+  loadedRoom = createEmptyRoom();
   
   colors = allNewColors(colorIndex);
 
   randomExits();
 
-  findExits(currentRoom);
+  findExits(loadedRoom);
 }
 
 function draw() {
@@ -166,16 +188,10 @@ function draw() {
 function loadStartScreen(){
   background(0);
   image(imageAssets.title, width/2, height/2, width-cellSize, cellSize/1.5);
-  image(imageAssets.clicktostart, width/2, height-cellSize, width/2, cellSize/2);
-  // drawFloatingCube();
-  // drawFloatingCube();
+  image(imageAssets.clicktostart, width/2, height-cellSize, width/2.5, cellSize/2.5);
 }
 
-function drawFloatingCube(texture){
-  
-}
-
-function createRoom() {
+function createEmptyRoom() {
   let table = new Array(GRID_SIZE);
   for(let i=0; i<GRID_SIZE; i++){
     if(i===0 || i===GRID_SIZE-1){
@@ -202,7 +218,7 @@ function displayBorders() {
   fill(color(colors[1]));
   for (let i=0; i<GRID_SIZE; i++){
     for (let j=0; j<GRID_SIZE; j++){
-      if (currentRoom[i][j]===1){
+      if (loadedRoom[i][j]===1){
         rect(cellSize*j+cellSize/2, cellSize*i+cellSize/2, cellSize, cellSize);
       }
     }
@@ -307,9 +323,10 @@ function movePlayer(addedPos) {
   else if (player.x + addedPos.x >= GRID_SIZE){ // if going to east exit
     changeRoom("east");
   }
-  else if (currentRoom[player.y + addedPos.y][player.x + addedPos.x] === 0){ // if not running into something
+  else if (loadedRoom[player.y + addedPos.y][player.x + addedPos.x] === 0){ // if not running into something
     player.y += addedPos.y;
     player.x += addedPos.x;
+    sfx.footstep.play();
   }
 }
 
@@ -317,7 +334,7 @@ function changeRoom(direction){
   // creates a new room based on which exit the player took
   // done by copying the row/column of the exit taken, then placing that same row/column on the other side of a newly generated room
   let oppositeExit;
-  let oldRoom = structuredClone(currentRoom);
+  let oldRoom = structuredClone(loadedRoom);
   let oldExitPos = [];
   if (direction === "north") {
     oppositeExit = 2; //south
@@ -326,10 +343,10 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       oldExitPos.push(oldRoom[0][i]);
     }
-    currentRoom = createRoom();
-    findExits(currentRoom);
+    loadedRoom = createEmptyRoom();
+    findExits(loadedRoom);
     for (let i=0; i<GRID_SIZE; i++){
-      currentRoom[GRID_SIZE-1][i] = oldExitPos[i];
+      loadedRoom[GRID_SIZE-1][i] = oldExitPos[i];
     }
     player.y = GRID_SIZE-1;
   } 
@@ -340,10 +357,10 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       oldExitPos.push(oldRoom[i][0]);
     }
-    currentRoom = createRoom();
-    findExits(currentRoom);
+    loadedRoom = createEmptyRoom();
+    findExits(loadedRoom);
     for (let i=0; i<GRID_SIZE; i++){
-      currentRoom[i][GRID_SIZE-1] = oldExitPos[i];
+      loadedRoom[i][GRID_SIZE-1] = oldExitPos[i];
     }
     player.x = GRID_SIZE-1;
   } 
@@ -354,10 +371,10 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       oldExitPos.push(oldRoom[GRID_SIZE-1][i]);
     }
-    currentRoom = createRoom();
-    findExits(currentRoom);
+    loadedRoom = createEmptyRoom();
+    findExits(loadedRoom);
     for (let i=0; i<GRID_SIZE; i++){
-      currentRoom[0][i] = oldExitPos[i];
+      loadedRoom[0][i] = oldExitPos[i];
     }
     player.y = 0;
   } 
@@ -368,10 +385,10 @@ function changeRoom(direction){
     for (let i=0; i<GRID_SIZE; i++){
       oldExitPos.push(oldRoom[i][GRID_SIZE-1]);
     }
-    currentRoom = createRoom();
-    findExits(currentRoom);
+    loadedRoom = createEmptyRoom();
+    findExits(loadedRoom);
     for (let i=0; i<GRID_SIZE; i++){
-      currentRoom[i][0] = oldExitPos[i];
+      loadedRoom[i][0] = oldExitPos[i];
     }
     player.x = 0;
   }
@@ -403,9 +420,9 @@ function mousePressed() {
     // teleports player to location on the grid
     let mouseGridX = floor(mouseX / cellSize);
     let mouseGridY = floor(mouseY / cellSize);
-    if (currentRoom[mouseGridY][mouseGridX] === 0){
-      currentRoom[player.y][player.x] = 0;
-      currentRoom[mouseGridY][mouseGridX] = 2;
+    if (loadedRoom[mouseGridY][mouseGridX] === 0){
+      loadedRoom[player.y][player.x] = 0;
+      loadedRoom[mouseGridY][mouseGridX] = 2;
       player.x = mouseGridX;
       player.y = mouseGridY;
     }
