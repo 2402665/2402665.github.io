@@ -21,10 +21,6 @@
 
 // Code:
 
-let colors = []; // adds in variables later
-let colorIndex = 3; // total amount of color variables used in code
-// 0 = background, 1 = border, 2 = player (currently unused due to player now an image)
-
 let exits = [0,0,0,0];
 let exitScale = 3; // tells how much grid slots an exit takes up
 
@@ -33,8 +29,11 @@ let cellSize; // will turn into a x/y value for scaling later
 
 let loadedRoom; // will turn into a 2D array later
 
+let playerAbleToMove = true; // variable used to check if player should be able to move, used for cutscenes/fades
 let playerMovementTime = 0; // time in millis() when player last moved
 let movementCooldown = 200; // cooldown in milliseconds for player movement
+
+// let fadeScale = 200 // time in millis() that fade in/out room happens
 
 let player = { // player values
   x: GRID_SIZE/2, // x value in relevance to grid
@@ -91,6 +90,9 @@ const roomObjects = { // for future update
 };
 
 let imageAssets = { // list of all sprites/spritesheets in the game
+  fadeBlack: null,
+  floor: null,
+  wall: null,
   player: null,
   octorok: null,
   mario: null,
@@ -118,9 +120,15 @@ let state = "start"; // current state of game
 
 function preload(){
   // load images
+  imageAssets.fadeBlack = loadImage("assets/images/fadeblack.png")
+  imageAssets.floor = loadImage("assets/images/floor-temp.png")
+  imageAssets.wall = loadImage("assets/images/wall-temp.png")
   imageAssets.player = loadImage("assets/images/link_temporary.png");
   imageAssets.title = loadImage("assets/images/title.png");
   imageAssets.clicktostart = loadImage("assets/images/click-to-start.png");
+
+  // set up sound formats to be used
+  soundFormats("mp3", "wav")
 
   // load background music
   bgm.title = loadSound("assets/bgm/title.mp3");
@@ -153,12 +161,14 @@ function setup() {
   rectMode(CENTER);
 
   loadedRoom = createEmptyRoom();
-  
-  colors = allNewColors(colorIndex);
 
   randomExits();
 
   findExits(loadedRoom);
+
+  bgm.title.loop();
+
+  sfx.footstep.playMode("sustain");
 }
 
 function draw() {
@@ -208,18 +218,19 @@ function createEmptyRoom() {
 }
 
 function displayRoom() {
-  background(color(colors[0]));
   noStroke();
   displayBorders();
   loadEntities();
 }
 
 function displayBorders() {
-  fill(color(colors[1]));
   for (let i=0; i<GRID_SIZE; i++){
     for (let j=0; j<GRID_SIZE; j++){
-      if (loadedRoom[i][j]===1){
-        rect(cellSize*j+cellSize/2, cellSize*i+cellSize/2, cellSize, cellSize);
+      if (loadedRoom[i][j]===0){
+        image(imageAssets.floor, cellSize*j+cellSize/2, cellSize*i+cellSize/2, cellSize, cellSize);
+      }
+      else if (loadedRoom[i][j]===1){
+        image(imageAssets.wall, cellSize*j+cellSize/2, cellSize*i+cellSize/2, cellSize, cellSize);
       }
     }
   }
@@ -282,27 +293,31 @@ function loadPlayer() {
 function overworldControls() {
   let addedPos = {x: 0, y: 0};
   if (state === "explore") {
-    if (millis() > playerMovementTime + movementCooldown){
+    if (millis() > playerMovementTime + movementCooldown && playerAbleToMove){
       if (keyIsDown(87) || keyIsDown(38) ) {
         // w or up arrow
         addedPos.y = -1;
         playerMovementTime = millis();
+        sfx.footstep.play();
       } 
       else if (keyIsDown(83) || keyIsDown(40)  ) {
         // s or down arrow
         addedPos.y = 1;
         playerMovementTime = millis();
+        sfx.footstep.play();
       } 
       else if (keyIsDown(65) || keyIsDown(37)  ) {
         // a or left arrow
         addedPos.x = -1;
         playerMovementTime = millis();
+        sfx.footstep.play();
       } 
       else if (keyIsDown(68) || keyIsDown(39)  ) {
         // d or right arrow
         addedPos.x = 1;
         playerMovementTime = millis();
-      } 
+        sfx.footstep.play();
+      }
     }
   }
   movePlayer(addedPos);
@@ -326,7 +341,9 @@ function movePlayer(addedPos) {
   else if (loadedRoom[player.y + addedPos.y][player.x + addedPos.x] === 0){ // if not running into something
     player.y += addedPos.y;
     player.x += addedPos.x;
-    sfx.footstep.play();
+  }
+  else if (loadedRoom[player.y + addedPos.y][player.x + addedPos.x] === 1){
+    sfx.hit_wall.play();
   }
 }
 
@@ -392,28 +409,28 @@ function changeRoom(direction){
     }
     player.x = 0;
   }
-  colors = allNewColors(colorIndex);
 }
 
-function randomColor() {
-  let r = random(255);
-  let g = random(255);
-  let b = random(255);
-  return [r, g, b];
-}
+// function fadeIntoBlack(){
+//   for (let i=0; i>256; i++){
+//     push();
+//     tint(255, i);
+//     image(imageAssets.fadeBlack, 0, 0, width, height);
+//   }
+// }
 
-function allNewColors(totalColors){
-  // expands randomColor() to a function that can make multiple colors in a table
-  let newColorTable = [];
-  for (let i = 0; i < totalColors; i++){
-    let newColor = randomColor();
-    newColorTable.push(newColor);
-  }
-  return newColorTable;
-}
+// function fadeOutBlack(){
+//   for (let i=255; i<=0; i++){
+//     push();
+//     tint(255, i);
+//     image(imageAssets.fadeBlack, 0, 0, width, height);
+//   }
+// }
 
 function mousePressed() { 
   if (state === "start"){
+    bgm.title.stop();
+    bgm.overworld.loop();
     state = "explore";
   }
   else if (state === "explore"){
@@ -421,24 +438,13 @@ function mousePressed() {
     let mouseGridX = floor(mouseX / cellSize);
     let mouseGridY = floor(mouseY / cellSize);
     if (loadedRoom[mouseGridY][mouseGridX] === 0){
-      loadedRoom[player.y][player.x] = 0;
-      loadedRoom[mouseGridY][mouseGridX] = 2;
       player.x = mouseGridX;
       player.y = mouseGridY;
+      sfx.click.play();
     }
   }
   else if (state === "battle"){
     // activate some battle button, depending on where clicked
-  }
-}
-
-function mouseWheel(event) { // will be scrapped in future versions where images are used instead of colors
-  //darkens or lightens all colors
-  // event.delta is how much the mouse has scrolled, and since this value is decently high, it is divided by 10 in the formula to keep colors similar.
-  for (let aColor of colors){
-    for (let i=0; i<aColor.length; i++){
-      aColor[i] += event.delta / 10;
-    }
   }
 }
 

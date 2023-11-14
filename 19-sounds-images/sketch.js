@@ -30,5 +30,5 @@ function draw() {
 }
 
 function mousePressed(){
-  yahoo.play();
+  yahoo.play(); 
 }
