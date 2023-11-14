@@ -34,3 +34,6 @@
 - [Grid Neighbors Assignment](22-neighbors)
 - [Game of Life Activity](23-game-of-life)
 - [Character Grid Movement](24-char-grid)
+- [Platformer - Text Copying Demo](25-text-copying)
+- [Dog - Object Oriented Programming Demo](26-dog-oop)
+- [Walker - OOP Demo 2](27-walker-oop)

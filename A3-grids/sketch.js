@@ -1,22 +1,23 @@
 // Ethan Heshka
 // Computer Science 30
 // 2D Arrays Assignment
-// Finished on November 10 2023
+// Finished on November 13 2023
 // Project Name: Exploration Game - Into The Grid
 
 // Project Desription:
 // A fresh take on the previous room explorer, redoing the game to be based on a 2D array
 // Controls:
 // Use the WSAD or arrow keys to control Link.
-// Click the mouse in any empty area to teleport the player to that area.
-// Scroll the mouse wheel forward to make all colors darker.
-// Scroll the mouse wheel backward to make all colors lighter.
+// Click the mouse in any empty area to teleport Link to that area.
 
 // Extras for Experts:
-// 
+// - Background Music/Sound Effects present and functional
+// - Used playMode() to ensure footsteps play over each other
+// - Used formulas with millis() to create a cooldown for player movement on the grid
+// - Consistent use and bending of images to fit in grid and create the rooms
 
 // Notes:
-// Many "states" are present in the code, but for right now only "explore" will trigger.
+// Many "states" are present in the code, but for right now only "start" and "explore" will trigger.
 // north = 0, west = 1, south = 2, east = 3
 
 // Code:
@@ -105,12 +106,12 @@ let imageAssets = { // list of all sprites/spritesheets in the game
   message: null,
 };
 
-let bgm = {
+let bgm = { // list of all background music in the game
   title: null,
   overworld: null,
 };
 
-let sfx = {
+let sfx = { // list of all sound effects in the game
   click: null,
   footstep: null,
   hit_wall: null,
@@ -120,15 +121,15 @@ let state = "start"; // current state of game
 
 function preload(){
   // load images
-  imageAssets.fadeBlack = loadImage("assets/images/fadeblack.png")
-  imageAssets.floor = loadImage("assets/images/floor-temp.png")
-  imageAssets.wall = loadImage("assets/images/wall-temp.png")
+  imageAssets.fadeBlack = loadImage("assets/images/fadeblack.png");
+  imageAssets.floor = loadImage("assets/images/floor-temp.png");
+  imageAssets.wall = loadImage("assets/images/wall-temp.png");
   imageAssets.player = loadImage("assets/images/link_temporary.png");
   imageAssets.title = loadImage("assets/images/title.png");
   imageAssets.clicktostart = loadImage("assets/images/click-to-start.png");
 
   // set up sound formats to be used
-  soundFormats("mp3", "wav")
+  soundFormats("mp3", "wav");
 
   // load background music
   bgm.title = loadSound("assets/bgm/title.mp3");
@@ -342,7 +343,7 @@ function movePlayer(addedPos) {
     player.y += addedPos.y;
     player.x += addedPos.x;
   }
-  else if (loadedRoom[player.y + addedPos.y][player.x + addedPos.x] === 1){
+  else if (loadedRoom[player.y + addedPos.y][player.x + addedPos.x] === 1){ // if running into a wall
     sfx.hit_wall.play();
   }
 }
