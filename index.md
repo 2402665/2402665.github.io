@@ -37,3 +37,4 @@
 - [Platformer - Text Copying Demo](25-text-copying)
 - [Dog - Object Oriented Programming Demo](26-dog-oop)
 - [Walker - OOP Demo 2](27-walker-oop)
+- [Bouncing Ball - OOP Demo 3](28-ball-oop)
