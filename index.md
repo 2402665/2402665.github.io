@@ -42,3 +42,4 @@
 - [Firework Particles - OOP Demo 5](30-firework-oop)
 - ["Inheritance" - OOP Demo 6](31-inheritance-oop)
 - [p5js 2D Collision Library Demo](32-2d-collision)
+- [p5play Library Demo](33-p5play)
